@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#signup-form-input-username::placeholder,
+#signup-form-input-email::placeholder,
+#signup-form-input-password::placeholder,
+#signin-form-input-username::placeholder,
+#signin-form-input-password::placeholder {
+  color: #6b7280;
+}
+
+#signup-form-input-email:focus,
+#signup-form-input-username:focus,
+#signup-form-input-password:focus,
+#signin-form-input-username:focus,
+#signin-form-input-password:focus {
+  border: 1px solid lightskyblue;
+}
+
+
+.shadcn-toast-success {
+  background-color: #ffffff !important;
+  color: rgb(8, 160, 8) !important;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.shadcn-toast-failure {
+  background-color: #ffffff !important;
+  color: rgb(207, 36, 36) !important;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
