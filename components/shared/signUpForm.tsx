@@ -113,7 +113,6 @@ export default function SignUpForm() {
             setRecaptchaToken(null);
             resetRecaptcha();
 
-            setLoading(false)
 
             // Redirect to the home page or another route after successful signup
             router.push('/');

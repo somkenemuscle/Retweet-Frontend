@@ -37,6 +37,8 @@ export default function SignInForm() {
     const router = useRouter();
     // State for password visibility
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+
 
     // Toggle password visibility
     const togglePasswordVisibility = () => {
@@ -55,6 +57,10 @@ export default function SignInForm() {
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
+
+            // Show loader before making the request
+            setLoading(true);
+
             const res = await axiosInstance.post('/auth/signin',
                 {
                     username: values.username,
@@ -108,6 +114,9 @@ export default function SignInForm() {
                 className: "shadcn-toast-failure",
                 description: errorMessage
             });
+        } finally {
+            // Hide the loader after request is complete (either success or error)
+            setLoading(false);
         }
 
     }
@@ -176,7 +185,7 @@ export default function SignInForm() {
                         <Button
                             type="submit"
                             className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-900 p-6">
-                            Sign In  <span className="ml-3"> <Loader  /> </span>
+                            Sign In  {loading && <span className="ml-3"> <Loader /> </span>}
                         </Button>
 
                         {/* Sign-up Prompt */}
