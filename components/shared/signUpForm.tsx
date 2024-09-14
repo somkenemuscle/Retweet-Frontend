@@ -86,6 +86,9 @@ export default function SignUpForm() {
                 return;
             }
 
+            // Show loader before making the request
+            setLoading(true);
+
             // Send a POST request to the signup endpoint
             const res = await axiosInstance.post('/auth/signup', {
                 username: values.username,
@@ -94,7 +97,6 @@ export default function SignUpForm() {
                 recaptchaToken
             });
 
-            setLoading(true)
 
             // Extract message from response
             const { message, username } = res.data;
@@ -157,11 +159,10 @@ export default function SignUpForm() {
             // Clear the reCAPTCHA token
             setRecaptchaToken(null);
             resetRecaptcha();
-            setLoading(false)
-
+        } finally {
+            // Hide the loader after request is complete (either success or error)
+            setLoading(false);
         }
-
-
     }
 
 
@@ -256,7 +257,7 @@ export default function SignUpForm() {
                             type="submit"
                             className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-800 p-6"
                         >
-                            Create account {loading && (<span className="ml-3"> <Loader /> </span>)}
+                            Create account {loading && <span className="ml-3"> <Loader /> </span>}
                         </Button>
 
                         {/* Already have account? */}
