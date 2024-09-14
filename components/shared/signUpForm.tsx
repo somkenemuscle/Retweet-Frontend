@@ -19,7 +19,7 @@ import { useState, useRef } from "react";
 import signUpPic from '../../public/assets/images/signup-img.avif';
 import axiosInstance from "@/lib/axiosInstance";
 import ReCAPTCHA from "react-google-recaptcha";
-
+import Loader from "./Loader";
 
 const FormSchema = z.object({
     username: z.string()
@@ -45,6 +45,7 @@ export default function SignUpForm() {
     const [showPassword, setShowPassword] = useState(false);
     const recaptchaRef = useRef<ReCAPTCHA>(null);
     const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
 
     // Toggle password visibility
@@ -66,7 +67,7 @@ export default function SignUpForm() {
     const onReCAPTCHAChange = (token: string | null) => {
         setRecaptchaToken(token);
     };
-    
+
     //Reser captch function
     const resetRecaptcha = () => {
         if (recaptchaRef.current) {
@@ -93,6 +94,7 @@ export default function SignUpForm() {
                 recaptchaToken
             });
 
+            setLoading(true)
 
             // Extract message from response
             const { message, username } = res.data;
@@ -103,9 +105,13 @@ export default function SignUpForm() {
             // Reset the form after successful signup
             form.reset();
 
+
+
             // Clear the reCAPTCHA token
             setRecaptchaToken(null);
             resetRecaptcha();
+
+            setLoading(false)
 
             // Redirect to the home page or another route after successful signup
             router.push('/');
@@ -151,6 +157,8 @@ export default function SignUpForm() {
             // Clear the reCAPTCHA token
             setRecaptchaToken(null);
             resetRecaptcha();
+            setLoading(false)
+
         }
 
 
@@ -248,7 +256,7 @@ export default function SignUpForm() {
                             type="submit"
                             className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-800 p-6"
                         >
-                            Create account
+                            Create account {loading && (<span className="ml-3"> <Loader /> </span>)}
                         </Button>
 
                         {/* Already have account? */}

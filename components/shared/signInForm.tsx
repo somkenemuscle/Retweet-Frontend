@@ -18,7 +18,7 @@ import Link from "next/link"
 import { Eye, EyeOff } from 'react-feather';
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-
+import Loader from "./Loader"
 
 const FormSchema = z.object({
     username: z.string()
@@ -176,7 +176,7 @@ export default function SignInForm() {
                         <Button
                             type="submit"
                             className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-900 p-6">
-                            Sign In
+                            Sign In  <span className="ml-3"> <Loader  /> </span>
                         </Button>
 
                         {/* Sign-up Prompt */}
