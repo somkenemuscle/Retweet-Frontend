@@ -122,7 +122,12 @@ function CreateInteractionForm({ action }: { action: string }) {
                     // Check for a response error
                     if (error.response) {
                         // Extract message from response if available
-                        errorMessage = error.response.data?.message || errorMessage;
+                        const responseMessage = error.response.data?.error;
+                        if (responseMessage) {
+                            errorMessage = responseMessage;
+                        } else {
+                            errorMessage = error.response.data?.message || errorMessage;
+                        }
                     } else {
                         // Handle cases where no response is available (e.g., network errors)
                         errorMessage = 'Network error. Please try again.';
@@ -132,9 +137,10 @@ function CreateInteractionForm({ action }: { action: string }) {
                     errorMessage = 'An unexpected error occurred. Please try again later.';
                 }
 
+                // Show error toast notification
                 toast({
                     className: "shadcn-toast-failure",
-                    description: 'You have to be logged in to make a post'
+                    description: errorMessage
                 });
             }
         }
