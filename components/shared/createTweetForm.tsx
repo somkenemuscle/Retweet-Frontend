@@ -62,11 +62,13 @@ function CreateInteractionForm({ action }: { action: string }) {
     // Handle form submission
     async function onSubmit(values: z.infer<typeof formSchema>) {
 
+        const username = localStorage.getItem('username')
+
         if (values.image) {
             // Check if image is base64 encoded and needs to be uploaded
             const hasImageChanged = values.image && isBase64Image(values.image);
 
-            if (hasImageChanged) {
+            if (hasImageChanged && username) {
                 // Upload image to server
                 try {
                     const imgRes = await startUpload(files);
@@ -90,17 +92,24 @@ function CreateInteractionForm({ action }: { action: string }) {
                 if (imageInput) {
                     imageInput.value = ''; // Clear the file input field manually
                 }
-                const res = await axiosInstance.post('/tweets', {
-                    text: values?.text,
-                    image: values?.image
-                })
 
-                const { message, newTweet } = res.data;
-                toast({
-                    className: "shadcn-toast-success",
-                    description: message
-                });
-                console.log(newTweet)
+                if (username) {
+                    const res = await axiosInstance.post('/tweets', {
+                        text: values?.text,
+                        image: values?.image
+                    });
+                    const { message, newTweet } = res.data;
+                    toast({
+                        className: "shadcn-toast-success",
+                        description: message
+                    });
+                } else {
+                    toast({
+                        className: "shadcn-toast-failure",
+                        description: "You have to be logged in to make post"
+                    });
+                }
+
 
             } catch (error: any) {
                 console.error('Error occurred while making a tweet:', error);

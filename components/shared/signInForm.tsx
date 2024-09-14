@@ -19,15 +19,17 @@ import { Eye, EyeOff } from 'react-feather';
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 
+
 const FormSchema = z.object({
     username: z.string()
-        .min(4, { message: "Username must be at least 4 characters" })
-        .max(20, { message: "Username must be no more than 20 characters" }) // optional: add a max length constraint
-        .regex(/^[a-zA-Z0-9.-]+$/, { message: "Username can only contain letters, numbers, ( . ) and ( - )" }), // regex validation,
+        .min(1, { message: "Username is required" })
+        .max(20, { message: "Username must be no more than 20 characters" })
+        .regex(/^[a-zA-Z0-9._-]+$/, { message: "Username can only contain letters, numbers, periods ( . ), hyphens ( - ), or underscores ( _ )." }),
+
     password: z.string()
-        .min(6, { message: "Password must be at least 6 characters", })
+        .min(1, { message: "Password is required" })
         .max(50, { message: "Password must be no more than 50 characters" })
-})
+});
 
 
 export default function SignInForm() {
@@ -86,7 +88,12 @@ export default function SignInForm() {
                 // Check for a response error
                 if (error.response) {
                     // Extract message from response if available
-                    errorMessage = error.response.data?.message || errorMessage;
+                    const responseMessage = error.response.data?.error;
+                    if (responseMessage) {
+                        errorMessage = responseMessage;
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
                 } else {
                     // Handle cases where no response is available (e.g., network errors)
                     errorMessage = 'Network error. Please try again.';
@@ -96,11 +103,13 @@ export default function SignInForm() {
                 errorMessage = 'An unexpected error occurred. Please try again later.';
             }
 
+            // Show error toast notification
             toast({
                 className: "shadcn-toast-failure",
                 description: errorMessage
             });
         }
+
     }
 
 
@@ -173,6 +182,10 @@ export default function SignInForm() {
                         {/* Sign-up Prompt */}
                         <p className="text-sm text-center text-gray-500">
                             New to Retweet? <Link className="text-indigo-600 hover:underline" href="/sign-up">Create account here</Link>
+                        </p>
+
+                        <p className="text-sm text-right text-indigo-600">
+                            <span aria-hidden="true">&larr;</span><Link className="hover:underline" href="/"> Go Back</Link>
                         </p>
                     </form>
                 </Form>

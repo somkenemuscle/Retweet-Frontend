@@ -1,35 +1,40 @@
 'use client'
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormField,
     FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import axios from "axios"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 import { Eye, EyeOff } from 'react-feather';
-import { useState } from "react"
-import signUpPic from '../../public/assets/images/signup-img.avif'
-import axiosInstance from "@/lib/axiosInstance"
+import { useState, useRef } from "react";
+import signUpPic from '../../public/assets/images/signup-img.avif';
+import axiosInstance from "@/lib/axiosInstance";
+import ReCAPTCHA from "react-google-recaptcha";
+
 
 const FormSchema = z.object({
     username: z.string()
         .min(4, { message: "Username must be at least 4 characters" })
-        .max(20, { message: "Username must be no more than 20 characters." }) // optional: add a max length constraint
-        .regex(/^[a-zA-Z0-9.-]+$/, { message: "Username can only contain letters, numbers, ( . ) and ( - )" }), // regex validation,
+        .max(20, { message: "Username must be no more than 20 characters." })
+        .regex(/^[a-zA-Z0-9._-]+$/, { message: "Username can only contain letters, numbers, periods ( . ), hyphens ( - ), or underscores ( _ )." }),
     email: z.string()
         .min(5, { message: "Enter a valid email", })
         .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, { message: "Must be a valid email address with  'name@gmail.com' " }),
     password: z.string()
-        .min(6, { message: "Password must be at least 6 characters", })
-        .max(50, { message: "Password must be no more than 50 characters" })
+        .min(6, { message: 'Password must be at least 6 characters long' })
+        .max(50, { message: 'Password must be no more than 50 characters long' })
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#_-])[A-Za-z\d@$!%*?&#_-]{6,}$/, {
+            message: 'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
+        })
 })
 
 
@@ -38,6 +43,9 @@ export default function SignUpForm() {
     const router = useRouter();
     // State for password visibility
     const [showPassword, setShowPassword] = useState(false);
+    const recaptchaRef = useRef<ReCAPTCHA>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
 
     // Toggle password visibility
     const togglePasswordVisibility = () => {
@@ -53,17 +61,31 @@ export default function SignUpForm() {
             email: "",
             password: ""
         }
-    })
+    });
+
+    const onReCAPTCHAChange = (token: string | null) => {
+        setRecaptchaToken(token);
+    };
 
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
+            if (!recaptchaToken) {
+                toast({
+                    className: "shadcn-toast-failure",
+                    description: "Please complete the reCAPTCHA",
+                });
+                return;
+            }
+
             // Send a POST request to the signup endpoint
             const res = await axiosInstance.post('/auth/signup', {
                 username: values.username,
                 email: values.email,
-                password: values.password
+                password: values.password,
+                recaptchaToken
             });
+
 
             // Extract message from response
             const { message, username } = res.data;
@@ -94,7 +116,12 @@ export default function SignUpForm() {
                 // Check for a response error
                 if (error.response) {
                     // Extract message from response if available
-                    errorMessage = error.response.data?.message || errorMessage;
+                    const responseMessage = error.response.data?.error;
+                    if (responseMessage) {
+                        errorMessage = responseMessage;
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
                 } else {
                     // Handle cases where no response is available (e.g., network errors)
                     errorMessage = 'Network error. Please try again.';
@@ -110,6 +137,7 @@ export default function SignUpForm() {
                 description: errorMessage
             });
         }
+
 
     }
 
@@ -190,6 +218,15 @@ export default function SignUpForm() {
                                 </>
                             )}
                         />
+
+                        <div style={{ transform: 'scale(0.8)', transformOrigin: '0 0', width: '100%', display: 'flex', justifyContent: 'left', marginTop: '15px', marginBottom: '-20px' }}>
+                            <ReCAPTCHA
+                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
+                                onChange={onReCAPTCHAChange}
+                                ref={recaptchaRef}
+                            />
+                        </div>
+
 
                         {/* Submit Button */}
                         <Button

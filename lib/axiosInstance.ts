@@ -3,14 +3,14 @@ import axios from 'axios';
 
 // Create an instance of axios with default settings
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000/api', // Base URL for your API requests
-  withCredentials: true, // Ensure cookies are sent with requests (important for HttpOnly cookies)
+  baseURL: 'http://localhost:4000/api',
+  withCredentials: true,
 });
 
 
-// This is where you can handle responses or errors globally
+// handle responses or errors globally
 axiosInstance.interceptors.response.use(
-  (response) => response, // Pass through successful responses
+  (response) => response,
   async (error) => {
     const { response } = error;
     const originalRequest = response?.config;
@@ -18,20 +18,15 @@ axiosInstance.interceptors.response.use(
     // Check if the error status is 401 and if it is related to token expiration
     if (response?.status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true;
-      const errorMessage = response.data?.message;
+      const errorCode = response.data?.code;
 
-      // Only handle token refresh if the error message indicates token expiration
-      if (errorMessage === 'Refresh token not found, please log in again.' ||
-        errorMessage === 'Invalid refresh token. Please log in again.' ||
-        errorMessage === 'Unauthorized, You dont have permission for this') {
-
+      // Only handle token refresh if the error message indicates token expiration on unauthorization
+      if (errorCode === 'UNAUTHORIZED_ISLOGGEDIN_ACCESS') {
         try {
           await axios.post('http://localhost:4000/api/auth/token', {}, { withCredentials: true });
           return axiosInstance(originalRequest);
         } catch (refreshError) {
           console.error('Token refresh error:', refreshError);
-
-
 
           // If the refresh fails, reject the original error and possibly redirect to login
           return Promise.reject(refreshError);
