@@ -66,6 +66,13 @@ export default function SignUpForm() {
     const onReCAPTCHAChange = (token: string | null) => {
         setRecaptchaToken(token);
     };
+    
+    //Reser captch function
+    const resetRecaptcha = () => {
+        if (recaptchaRef.current) {
+            recaptchaRef.current.reset();
+        }
+    };
 
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
@@ -95,6 +102,10 @@ export default function SignUpForm() {
 
             // Reset the form after successful signup
             form.reset();
+
+            // Clear the reCAPTCHA token
+            setRecaptchaToken(null);
+            resetRecaptcha();
 
             // Redirect to the home page or another route after successful signup
             router.push('/');
@@ -136,6 +147,10 @@ export default function SignUpForm() {
                 className: "shadcn-toast-failure",
                 description: errorMessage
             });
+
+            // Clear the reCAPTCHA token
+            setRecaptchaToken(null);
+            resetRecaptcha();
         }
 
 
