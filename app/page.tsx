@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
+import axiosInstance from "@/lib/axiosInstance";
 
 
 export default function Home() {
@@ -24,7 +24,7 @@ export default function Home() {
   const handleLogout = async () => {
     try {
       // Send request to backend to invalidate the session or token
-      const res = await axios.post('http://localhost:4000/api/auth/logout', {}, { withCredentials: true });
+      const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
 
       const { message } = res.data;
       // Clear any local storage or session data
