@@ -1,6 +1,5 @@
 'use client'
 import CreateInteractionForm from "@/components/shared/createTweetForm";
-import axios from "axios";
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
