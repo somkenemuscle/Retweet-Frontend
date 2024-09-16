@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
-
+import Navbar from "@/components/shared/Sidebar";
 
 export default function Home() {
   const router = useRouter();
@@ -62,40 +62,40 @@ export default function Home() {
 
   return (
     <div>
-      <CreateInteractionForm
-        action="Add"
-      />
-
-      {username ? (
-        <div>
-          <p>{username} is logged in currently</p>
-          <button onClick={() => handleLogout()}>
-            Logout
-          </button>
-        </div>
-
-      ) : (
-        <div>
-          <p>No one is logged in currently</p>
-          <Link href={'/sign-in'}>
-            <button>
-              Sign In
-            </button>
-          </Link>
-        </div>
-      )}
-
-
-
-
-
-
-
-
+      <Navbar />
       <div className="cursor-pointer mt-40 mb-4 container mx-auto max-w-lg  p-0">
+
+        <CreateInteractionForm
+          action="Add"
+        />
+
+        <div className="p-6">
+        {username ? (
+          <div>
+            <p>{username} is logged in currently</p>
+            <button onClick={() => handleLogout()}>
+              Logout
+            </button>
+          </div>
+
+        ) : (
+          <div>
+            <p>No one is logged in currently</p>
+            <Link href={'/sign-in'}>
+              <button>
+                Sign In
+              </button>
+            </Link>
+          </div>
+        )}
+
+        </div>
+       
+
+
         <ul className="flex flex-col ">
           {tweets.map((tweet) => (
-            <li key={tweet._id} className="border border-gray-300 rounded-lg flex p-4">
+            <li key={tweet._id} className="border border-gray-300 rounded-xl flex p-4">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
                   <Link href={`/profile/${tweet.author.username}/`}>
@@ -120,7 +120,7 @@ export default function Home() {
                     src={tweet.image}
                     width={200}
                     height={200}
-                    className="w-full rounded-lg mt-4 mb-2"
+                    className="w-full rounded-xl mt-4 mb-2"
                     layout="responsive"
                     priority
                   />
