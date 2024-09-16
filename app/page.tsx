@@ -20,7 +20,7 @@ export default function Home() {
     try {
       const res = await axiosInstance.get('/tweets');
       const { newTweet } = res.data;
-      setTweets(newTweet)
+      setTweets(...newTweet)
     } catch (error) {
       console.log(error)
     }
