@@ -100,7 +100,7 @@ export default function Home() {
                 <div className="flex items-center mb-2">
                   <Link href={`/profile/${tweet.author.username}/`}>
                     <Image
-                      src='' // Replace with actual avatar source
+                      src='https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dprofile&psig=AOvVaw1AIB-rz9Q0-9aM4I0s_Uzt&ust=1726615281410000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCODI76zNyIgDFQAAAAAdAAAAABAE' // Replace with actual avatar source
                       alt="profilepic"
                       width={100}
                       height={100}
