@@ -5,7 +5,7 @@ const f = createUploadthing();
 
 // FileRouter for simple image uploading without fake auth or complex middleware
 export const ourFileRouter = {
-  media: f({ image: { maxFileSize: "2MB" } })
+  media: f({ image: { maxFileSize: "4MB" } })
     .onUploadComplete(async ({ file }) => {
       // Return data for client callback if needed
       return { uploadedFileUrl: file.url };
