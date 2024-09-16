@@ -1,4 +1,4 @@
-import SignUpForm from "@/components/shared/signUpForm"
+import SignUpForm from "@/components/forms/signUpForm"
 const SignUpPage = () => {
     return (
         <main>
