@@ -19,8 +19,7 @@ export default function Home() {
   async function getAllTweets() {
     try {
       const res = await axiosInstance.get('/tweets');
-      const { newTweet } = res.data;
-      setTweets(...newTweet)
+      setTweets(res.data)
     } catch (error) {
       console.log(error)
     }
