@@ -93,12 +93,11 @@ export default function Home() {
        
 
 
-        <ul className="flex flex-col ">
+        <ul className="flex flex-col mb-20 ">
           {tweets.map((tweet) => (
             <li key={tweet._id} className="border border-gray-300 rounded-xl flex p-4">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
-                  <Link href={`/profile/${tweet.author.username}/`}>
                     <Image
                       src='https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dprofile&psig=AOvVaw1AIB-rz9Q0-9aM4I0s_Uzt&ust=1726615281410000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCODI76zNyIgDFQAAAAAdAAAAABAE' // Replace with actual avatar source
                       alt="profilepic"
@@ -107,7 +106,6 @@ export default function Home() {
                       className="w-8 h-8 rounded-full mr-2"
                       priority
                     />
-                  </Link>
                   <p className="text-black">
                     {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span>  <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
                   </p>
