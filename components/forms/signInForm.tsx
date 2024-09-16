@@ -18,7 +18,7 @@ import Link from "next/link"
 import { Eye, EyeOff } from 'react-feather';
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-import Loader from "./Loader"
+import Loader from "../ui/Loader";
 import { SignInFormSchema } from "@/lib/authSchema"
 
 

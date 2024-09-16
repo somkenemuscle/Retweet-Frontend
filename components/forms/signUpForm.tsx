@@ -19,7 +19,7 @@ import { useState, useRef } from "react";
 import signUpPic from '../../public/assets/images/signup-img.avif';
 import axiosInstance from "@/lib/axiosInstance";
 import ReCAPTCHA from "react-google-recaptcha";
-import Loader from "./Loader";
+import Loader from "../ui/Loader"
 import { SignUpFormSchema } from "@/lib/authSchema";
 
 
