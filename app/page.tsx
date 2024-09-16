@@ -63,34 +63,34 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <div className="cursor-pointer mt-40 mb-4 container mx-auto max-w-lg  p-0">
+      <div className="cursor-pointer mt-2 mb-4 container mx-auto max-w-lg  p-0">
 
         <CreateInteractionForm
           action="Add"
         />
 
         <div className="p-6">
-        {username ? (
-          <div>
-            <p>{username} is logged in currently</p>
-            <button onClick={() => handleLogout()}>
-              Logout
-            </button>
-          </div>
-
-        ) : (
-          <div>
-            <p>No one is logged in currently</p>
-            <Link href={'/sign-in'}>
-              <button>
-                Sign In
+          {username ? (
+            <div>
+              <p>{username} is logged in currently</p>
+              <button onClick={() => handleLogout()}>
+                Logout
               </button>
-            </Link>
-          </div>
-        )}
+            </div>
+
+          ) : (
+            <div>
+              <p>No one is logged in currently</p>
+              <Link href={'/sign-in'}>
+                <button>
+                  Sign In
+                </button>
+              </Link>
+            </div>
+          )}
 
         </div>
-       
+
 
 
         <ul className="flex flex-col mb-20 ">
@@ -98,14 +98,14 @@ export default function Home() {
             <li key={tweet._id} className="border border-gray-300 rounded-xl flex p-4">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
-                    <Image
-                      src='https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dprofile&psig=AOvVaw1AIB-rz9Q0-9aM4I0s_Uzt&ust=1726615281410000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCODI76zNyIgDFQAAAAAdAAAAABAE' // Replace with actual avatar source
-                      alt="profilepic"
-                      width={100}
-                      height={100}
-                      className="w-8 h-8 rounded-full mr-2"
-                      priority
-                    />
+                  <Image
+                    src='https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.pngegg.com%2Fen%2Fsearch%3Fq%3Dprofile&psig=AOvVaw1AIB-rz9Q0-9aM4I0s_Uzt&ust=1726615281410000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCODI76zNyIgDFQAAAAAdAAAAABAE' // Replace with actual avatar source
+                    alt="profilepic"
+                    width={100}
+                    height={100}
+                    className="w-8 h-8 rounded-full mr-2"
+                    priority
+                  />
                   <p className="text-black">
                     {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span>  <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
                   </p>

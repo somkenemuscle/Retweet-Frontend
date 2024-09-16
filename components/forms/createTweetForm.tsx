@@ -143,7 +143,6 @@ function CreateInteractionForm({ action }: { action: string }) {
 
     return (
         <div className="p-6">
-            CreateInteractionForm
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <FormField
