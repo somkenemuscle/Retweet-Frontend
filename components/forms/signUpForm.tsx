@@ -20,28 +20,12 @@ import signUpPic from '../../public/assets/images/signup-img.avif';
 import axiosInstance from "@/lib/axiosInstance";
 import ReCAPTCHA from "react-google-recaptcha";
 import Loader from "./Loader";
-
-const FormSchema = z.object({
-    username: z.string()
-        .min(4, { message: "Username must be at least 4 characters" })
-        .max(20, { message: "Username must be no more than 20 characters." })
-        .regex(/^[a-zA-Z0-9._-]+$/, { message: "Username can only contain letters, numbers, periods ( . ), hyphens ( - ), or underscores ( _ )." }),
-    email: z.string()
-        .min(5, { message: "Enter a valid email", })
-        .regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, { message: "Must be a valid email address with  'name@gmail.com' " }),
-    password: z.string()
-        .min(6, { message: 'Password must be at least 6 characters long' })
-        .max(50, { message: 'Password must be no more than 50 characters long' })
-        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#_-])[A-Za-z\d@$!%*?&#_-]{6,}$/, {
-            message: 'Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.'
-        })
-})
+import { SignUpFormSchema } from "@/lib/authSchema";
 
 
 export default function SignUpForm() {
     const { toast } = useToast();
     const router = useRouter();
-    // State for password visibility
     const [showPassword, setShowPassword] = useState(false);
     const recaptchaRef = useRef<ReCAPTCHA>(null);
     const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
@@ -54,9 +38,8 @@ export default function SignUpForm() {
     };
 
 
-
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
+    const form = useForm<z.infer<typeof SignUpFormSchema >>({
+        resolver: zodResolver(SignUpFormSchema ),
         defaultValues: {
             username: "",
             email: "",
@@ -76,7 +59,7 @@ export default function SignUpForm() {
     };
 
 
-    async function onSubmit(values: z.infer<typeof FormSchema>) {
+    async function onSubmit(values: z.infer<typeof SignUpFormSchema >) {
         try {
             if (!recaptchaToken) {
                 toast({

@@ -1,5 +1,5 @@
 'use client'
-import CreateInteractionForm from "@/components/shared/createTweetForm";
+import CreateInteractionForm from "@/components/forms/createTweetForm";
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,16 +22,15 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
+
+      // Redirect user to login or home page
+      router.push('/sign-in');
       // Send request to backend to invalidate the session or token
       const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
 
       const { message } = res.data;
       // Clear any local storage or session data
-      localStorage.removeItem('token');
       localStorage.removeItem('username');
-
-      // Redirect user to login or home page
-      router.push('/sign-in');
 
       // Show success message
       toast({

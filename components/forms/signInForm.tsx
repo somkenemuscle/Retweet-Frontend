@@ -19,26 +19,16 @@ import { Eye, EyeOff } from 'react-feather';
 import { useState } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import Loader from "./Loader"
+import { SignInFormSchema } from "@/lib/authSchema"
 
-const FormSchema = z.object({
-    username: z.string()
-        .min(1, { message: "Username is required" })
-        .max(20, { message: "Username must be no more than 20 characters" })
-        .regex(/^[a-zA-Z0-9._-]+$/, { message: "Username can only contain letters, numbers, periods ( . ), hyphens ( - ), or underscores ( _ )." }),
 
-    password: z.string()
-        .min(1, { message: "Password is required" })
-        .max(50, { message: "Password must be no more than 50 characters" })
-});
 
 
 export default function SignInForm() {
     const { toast } = useToast();
     const router = useRouter();
-    // State for password visibility
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
 
     // Toggle password visibility
     const togglePasswordVisibility = () => {
@@ -46,8 +36,8 @@ export default function SignInForm() {
     };
 
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
+    const form = useForm<z.infer<typeof SignInFormSchema>>({
+        resolver: zodResolver(SignInFormSchema),
         defaultValues: {
             username: "",
             password: ""
@@ -55,9 +45,8 @@ export default function SignInForm() {
     })
 
 
-    async function onSubmit(values: z.infer<typeof FormSchema>) {
+    async function onSubmit(values: z.infer<typeof SignInFormSchema>) {
         try {
-
             // Show loader before making the request
             setLoading(true);
 
