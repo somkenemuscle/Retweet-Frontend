@@ -5,19 +5,34 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
+import Image from "next/image";
 
 
 export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState('');
+  const [tweets, setTweets] = useState<Tweet[]>([]);
+
+
+
+  async function getAllTweets() {
+    try {
+      const res = await axiosInstance.get('/tweets');
+      const { newTweet } = res.data;
+      setTweets(newTweet)
+    } catch (error) {
+      console.log(error)
+    }
+
+  }
 
   useEffect(() => {
+    getAllTweets();
     const username = localStorage.getItem('username');
     if (username) {
       setUsername(username);
     }
-
   }, []);
 
   const handleLogout = async () => {
@@ -70,6 +85,77 @@ export default function Home() {
           </Link>
         </div>
       )}
+
+
+
+
+
+
+
+
+      <div className="cursor-pointer mt-40 mb-4 container mx-auto max-w-lg  p-0">
+        <ul className="flex flex-col ">
+          {tweets.map((tweet) => (
+            <li key={tweet._id} className="border border-gray-300 rounded-lg flex p-4">
+              <div className="flex flex-col flex-grow">
+                <div className="flex items-center mb-2">
+                  <Link href={`/profile/${tweet.author.username}/`}>
+                    <Image
+                      src='' // Replace with actual avatar source
+                      alt="profilepic"
+                      width={100}
+                      height={100}
+                      className="w-8 h-8 rounded-full mr-2"
+                      priority
+                    />
+                  </Link>
+                  <p className="text-black">
+                    {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span>  <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
+                  </p>
+                </div>
+
+                <h4 className="text-md font-normal mb-2">{tweet.text}</h4>
+                {tweet.image ? (
+                  <Image
+                    alt="tweet-image"
+                    src={tweet.image}
+                    width={200}
+                    height={200}
+                    className="w-full rounded-lg mt-4 mb-2"
+                    layout="responsive"
+                    priority
+                  />
+                ) : null}
+                <Link className="text-blue-500 hover:underline text-sm mt-2" href={`/tweets/${tweet._id}`}>
+                  View More
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

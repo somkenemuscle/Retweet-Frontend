@@ -16,14 +16,8 @@ import { useUploadThing } from "@/lib/uploadthing"
 import axios from 'axios'
 import axiosInstance from "@/lib/axiosInstance"
 import { useToast } from "@/hooks/use-toast"
+import { tweetFormSchema } from "@/lib/tweetSchema"
 
-const formSchema = z.object({
-    text: z.string().optional(),
-    image: z.string().optional(),
-}).refine((data) => data.text || data.image, {
-    message: "Either text or image must be provided",
-    path: ["text", "image"], // Error can be shown for both fields
-});
 
 
 // Main component
@@ -35,8 +29,8 @@ function CreateInteractionForm({ action }: { action: string }) {
     const [files, setFiles] = useState<File[]>([]);
 
     // Initialize form with validation
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof tweetFormSchema>>({
+        resolver: zodResolver(tweetFormSchema),
         defaultValues: { text: '', image: '' } // Ensure default values match schema
     });
 
@@ -60,7 +54,7 @@ function CreateInteractionForm({ action }: { action: string }) {
     }
 
     // Handle form submission
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof tweetFormSchema>) {
 
         const username = localStorage.getItem('username')
 
