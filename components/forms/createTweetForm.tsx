@@ -163,7 +163,7 @@ function CreateInteractionForm({ action }: { action: string }) {
                                 accept="image/*"
                                 onChange={(e) => { handleImage(e, field.onChange) }}
                                 type='file'
-                                className="w-96 px-3 py-2 border rounded-md focus:outline-none cursor-pointer"
+                                className="w-40 px-3 py-2 border rounded-md focus:outline-none cursor-pointer"
                             />
                         )}
                     />
