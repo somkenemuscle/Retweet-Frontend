@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import Navbar from "@/components/shared/Sidebar";
 
 export const metadata: Metadata = {
   title: "Retweet",
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Navbar />
         {children}
         <Toaster />
       </body>
