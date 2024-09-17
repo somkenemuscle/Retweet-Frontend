@@ -5,7 +5,7 @@ import { HomeIcon, PlusIcon, } from '@radix-ui/react-icons';
 
 export default function Navbar() {
     return (
-        <div className='mr-8'>
+        <div>
 
 
             <div className="fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-300 z-50 hidden lg:block">
@@ -52,7 +52,7 @@ export default function Navbar() {
                     </ul>
 
 
-                
+
 
 
                     <ul className="mt-7 space-y-1">
