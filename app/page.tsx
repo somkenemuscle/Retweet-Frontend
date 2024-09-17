@@ -7,45 +7,32 @@ import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
 import Navbar from "@/components/shared/Sidebar";
-import useTweetStore from "@/store/tweetStore";
-
 
 export default function Home() {
   const router = useRouter();
   const { toast } = useToast();
   const [username, setUsername] = useState('');
-  const { tweets, setTweets } = useTweetStore((state) => ({
-    tweets: state.tweets,
-    setTweets: state.setTweets,
-  }));
+  const [tweets, setTweets] = useState<Tweet[]>([]);
 
 
 
-
-  // Function to get all tweets
-  const getAllTweets = async () => {
+  async function getAllTweets() {
     try {
       const res = await axiosInstance.get('/tweets');
-      // Only update state if data has changed to avoid re-renders
-      if (res.data && res.data.length > 0) {
-        setTweets(res.data);  // This should trigger state updates
-      }
+      setTweets(res.data)
     } catch (error) {
-      console.error('Error fetching v tweets:', error);
+      console.log(error)
     }
-  };
 
-  // Fetch tweets on component mount
+  }
+
   useEffect(() => {
-    getAllTweets();  // Fetch all tweets on initial load
-
-    // Check for username in localStorage and set it
-    const storedUsername = localStorage.getItem('username');
-    if (storedUsername) {
-      setUsername(storedUsername);
+    getAllTweets();
+    const username = localStorage.getItem('username');
+    if (username) {
+      setUsername(username);
     }
-  }, []);  // Empty dependency array ensures this only runs once on mount
-
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -144,6 +131,7 @@ export default function Home() {
           ))}
         </ul>
       </div>
+
     </div>
   );
 }
