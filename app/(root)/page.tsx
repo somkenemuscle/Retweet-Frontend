@@ -93,18 +93,18 @@ export default function Home() {
 
         <ul className="flex flex-col mb-20 ">
           {tweets.map((tweet) => (
-            <li key={tweet._id} className="border border-gray-300 rounded-xl flex p-4">
+            <li key={tweet._id} className="border-gray-900 rounded-xl flex p-4 border-[0.5px]">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
                   <Image
-                    src='/assets/images/prof.jpg' // Replace with actual avatar source
+                    src='/assets/images/prof.jpg' 
                     alt="profilepic"
                     width={100}
                     height={100}
                     className="w-8 h-8 rounded-full mr-2"
                     priority
                   />
-                  <p className="text-black">
+                  <p className="text-white">
                     {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span>  <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
                   </p>
                 </div>
