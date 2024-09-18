@@ -7,11 +7,10 @@ export default function Navbar() {
     return (
         <div>
 
-
-            <div className="fixed top-0 left-0 h-screen w-64 bg-white border-r border-gray-300 z-50 hidden lg:block">
+            <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r border-gray-300 z-50 hidden lg:block">
 
                 <div className="px-4 py-6 ">
-                    <span className={`grid text-3xl font-bold h-7 m-4 w-32 place-content-center rounded-lg text-black`}>
+                    <span className={`grid text-3xl font-bold h-7 m-4 w-32 place-content-center rounded-lg text-amber-600`}>
                         Retweet
                     </span>
 
@@ -19,9 +18,9 @@ export default function Navbar() {
                         <li>
                             <a
                                 href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <HomeIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />  Home
+                                <HomeIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Home
                             </a>
                         </li>
 
@@ -31,9 +30,9 @@ export default function Navbar() {
                         <li>
                             <a
                                 href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />  Create
+                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Create
                             </a>
                         </li>
 
@@ -43,9 +42,9 @@ export default function Navbar() {
                         <li>
                             <a
                                 href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />  profile
+                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  profile
                             </a>
                         </li>
 
@@ -59,9 +58,9 @@ export default function Navbar() {
                         <li>
                             <a
                                 href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />  Logout
+                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Logout
                             </a>
                         </li>
 

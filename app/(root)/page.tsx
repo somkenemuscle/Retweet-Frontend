@@ -23,7 +23,6 @@ export default function Home() {
     } catch (error) {
       console.log(error)
     }
-
   }
 
   useEffect(() => {
@@ -36,7 +35,6 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-
       // Redirect user to login or home page
       router.push('/sign-in');
       // Send request to backend to invalidate the session or token
