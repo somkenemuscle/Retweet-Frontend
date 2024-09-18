@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
-import { HomeIcon, PlusIcon, PersonIcon, ExitIcon} from '@radix-ui/react-icons';
+import { HomeIcon, PlusIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
 
 
 export default function Navbar() {
     return (
         <div>
 
-            <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r border-gray-300 z-50 hidden lg:block">
+            <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r-[0.5px] border-gray-800 z-50 hidden lg:block">
 
                 <div className="px-4 py-6 ">
                     <span className={`grid text-3xl font-bold h-7 m-4 w-32 place-content-center rounded-lg text-amber-600`}>
