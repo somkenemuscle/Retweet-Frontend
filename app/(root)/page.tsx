@@ -93,7 +93,7 @@ export default function Home() {
 
         <ul className="flex flex-col mb-20 ">
           {tweets.map((tweet) => (
-            <li key={tweet._id} className="border-gray-600 rounded-xl flex p-4 border-[0.5px]">
+            <li key={tweet._id} className="border-gray-900 rounded-xl flex p-4 border-[0.5px]">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
                   <Image
