@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { HomeIcon, PlusIcon, } from '@radix-ui/react-icons';
+import { HomeIcon, PlusIcon, PersonIcon, ExitIcon} from '@radix-ui/react-icons';
 
 
 export default function Navbar() {
@@ -44,7 +44,7 @@ export default function Navbar() {
                                 href="/"
                                 className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  profile
+                                <PersonIcon className="h-7 w-7 inline-flex pr-1 text-white" />  profile
                             </a>
                         </li>
 
@@ -60,7 +60,7 @@ export default function Navbar() {
                                 href="/"
                                 className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
                             >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Logout
+                                <ExitIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Logout
                             </a>
                         </li>
 
