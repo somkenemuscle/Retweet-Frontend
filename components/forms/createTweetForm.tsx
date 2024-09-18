@@ -1,40 +1,36 @@
-"use client"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { isBase64Image } from "@/lib/utils"
+"use client";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { isBase64Image } from "@/lib/utils";
 import {
     Form,
     FormField,
-} from "@/components/ui/form"
-import { Input } from "../ui/input"
-import { useUploadThing } from "@/lib/uploadthing"
-import axios from 'axios'
-import axiosInstance from "@/lib/axiosInstance"
-import { useToast } from "@/hooks/use-toast"
-import { tweetFormSchema } from "@/lib/tweetSchema"
-
+} from "@/components/ui/form";
+import { Input } from "../ui/input";
+import { useUploadThing } from "@/lib/uploadthing";
+import axiosInstance from "@/lib/axiosInstance";
+import { useToast } from "@/hooks/use-toast";
+import { tweetFormSchema } from "@/lib/tweetSchema";
+import { AiOutlineFileImage } from "react-icons/ai";
 
 
 // Main component
 function CreateInteractionForm({ action }: { action: string }) {
-    // Hook to call the upload process
     const { startUpload } = useUploadThing("media");
     const router = useRouter();
     const { toast } = useToast();
     const [files, setFiles] = useState<File[]>([]);
 
-    // Initialize form with validation
     const form = useForm<z.infer<typeof tweetFormSchema>>({
         resolver: zodResolver(tweetFormSchema),
-        defaultValues: { text: '', image: '' } // Ensure default values match schema
+        defaultValues: { text: "", image: "" },
     });
 
-    // Handle image file selection and conversion to data URL
     function handleImage(
         e: React.ChangeEvent<HTMLInputElement>,
         fieldChange: (value: string) => void
@@ -42,28 +38,24 @@ function CreateInteractionForm({ action }: { action: string }) {
         e.preventDefault();
         const file = e.target.files?.[0];
 
-        if (file && file.type.startsWith("image/")) { // Ensure file is an image
+        if (file && file.type.startsWith("image/")) {
             const fileReader = new FileReader();
             fileReader.onload = () => {
                 const imageDataUrl = fileReader.result?.toString() || "";
                 fieldChange(imageDataUrl);
             };
             fileReader.readAsDataURL(file);
-            setFiles([file]); // Update state with the selected file
+            setFiles([file]);
         }
     }
 
-    // Handle form submission
     async function onSubmit(values: z.infer<typeof tweetFormSchema>) {
-
-        const username = localStorage.getItem('username')
+        const username = localStorage.getItem("username");
 
         if (values.image) {
-            // Check if image is base64 encoded and needs to be uploaded
             const hasImageChanged = values.image && isBase64Image(values.image);
 
             if (hasImageChanged && username) {
-                // Upload image to server
                 try {
                     const imgRes = await startUpload(files);
                     if (imgRes?.[0]?.url) {
@@ -71,106 +63,91 @@ function CreateInteractionForm({ action }: { action: string }) {
                     }
                 } catch (error) {
                     console.error("Error uploading image:", error);
-                    //do a toast here, saying choose an image less than 1mb
                 }
             }
         }
 
-        // Handle form submission logic (e.g., API call)
-        if (action === 'Add') {
+        if (action === "Add") {
             try {
-                // API call to create interaction
                 form.reset();
-                setFiles([]); // Clear the files state to remove the image
-                const imageInput = document.getElementById('image-input') as HTMLInputElement;
+                setFiles([]);
+                const imageInput = document.getElementById(
+                    "image-input"
+                ) as HTMLInputElement;
                 if (imageInput) {
-                    imageInput.value = ''; // Clear the file input field manually
+                    imageInput.value = "";
                 }
 
                 if (username) {
-                    const res = await axiosInstance.post('/tweets', {
+                    const res = await axiosInstance.post("/tweets", {
                         text: values?.text,
-                        image: values?.image
+                        image: values?.image,
                     });
-                    const { message, newTweet } = res.data;
+                    const { message } = res.data;
                     toast({
                         className: "shadcn-toast-success",
-                        description: message
+                        description: message,
                     });
                 } else {
                     toast({
                         className: "shadcn-toast-failure",
-                        description: "You have to be logged in to make post"
+                        description: "You have to be logged in to make a post",
                     });
                 }
-
-
             } catch (error: any) {
-                console.error('Error occurred while making a tweet:', error);
-
-                // Default error message
-                let errorMessage = 'An error occurred. Please try again.';
-
-                // Check if the error is an Axios error
-                if (axios.isAxiosError(error)) {
-                    // Check for a response error
-                    if (error.response) {
-                        // Extract message from response if available
-                        const responseMessage = error.response.data?.error;
-                        if (responseMessage) {
-                            errorMessage = responseMessage;
-                        } else {
-                            errorMessage = error.response.data?.message || errorMessage;
-                        }
-                    } else {
-                        // Handle cases where no response is available (e.g., network errors)
-                        errorMessage = 'Network error. Please try again.';
-                    }
-                } else {
-                    // Handle unexpected error types
-                    errorMessage = 'An unexpected error occurred. Please try again later.';
-                }
-
-                // Show error toast notification
-                toast({
-                    className: "shadcn-toast-failure",
-                    description: errorMessage
-                });
+                console.error("Error occurred while making a tweet:", error);
             }
         }
     }
 
-
     return (
-        <div className="p-6">
+        <div className="p-6  shadow-md max-w-lg mx-auto">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                >
                     <FormField
                         control={form.control}
                         name="text"
                         render={({ field }) => (
-                            <Textarea rows={4} {...field} className="max-w-sm px-3 py-2 border rounded-md focus:outline-none" />
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="image"
-                        render={({ field }) => (
-                            <Input
-                                id="image-input"
-                                accept="image/*"
-                                onChange={(e) => { handleImage(e, field.onChange) }}
-                                type='file'
-                                className="w-40 px-3 py-2 border rounded-md focus:outline-none cursor-pointer"
+                            <Textarea
+                                rows={3}
+                                {...field}
+                                placeholder="What's happening?"
+                                className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring border-gray-800-[0.5px] focus:border-blue-300"
                             />
                         )}
                     />
-                    <Button type="submit">Submit</Button>
+
+                    <div className="flex items-center justify-between space-x-4">
+                        <FormField
+                            control={form.control}
+                            name="image"
+                            render={({ field }) => (
+                                <label className="cursor-pointer">
+                                    <AiOutlineFileImage className="w-6 h-6 text-blue-500" />
+                                    <input
+                                        id="image-input"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            handleImage(e, field.onChange);
+                                        }}
+                                        type="file"
+                                        className="hidden"
+                                    />
+                                </label>
+                            )}
+                        />
+                    </div>
+
+                    <Button type="submit" className="w-full py-2 bg-blue-500 text-white rounded-lg">
+                        Submit
+                    </Button>
                 </form>
             </Form>
         </div>
-    )
+    );
 }
 
-export default CreateInteractionForm
+export default CreateInteractionForm;
