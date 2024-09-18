@@ -67,7 +67,7 @@ export default function Home() {
           action="Add"
         />
 
-        <div className="p-6">
+        {/* <div className="p-6">
           {username ? (
             <div>
               <p>{username} is logged in currently</p>
@@ -87,7 +87,7 @@ export default function Home() {
             </div>
           )}
 
-        </div>
+        </div> */}
 
 
 
