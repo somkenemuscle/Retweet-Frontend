@@ -1,98 +1,105 @@
-'use client'
 import React from 'react'
-import { HomeIcon, PlusIcon, PersonIcon, ExitIcon } from '@radix-ui/react-icons';
-
+import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/react-icons';
+import { useEffect, useState } from 'react';
+import axiosInstance from '@/lib/axiosInstance';
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 export default function Navbar() {
+    const router = useRouter();
+
+    const [username, setUsername] = useState('');
+    const { toast } = useToast();
+
+    useEffect(() => {
+        const username = localStorage.getItem('username');
+        if (username) {
+            setUsername(username);
+        }
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            router.push('/sign-in');
+            const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
+            const { message } = res.data;
+            localStorage.removeItem('username');
+            toast({
+                className: "shadcn-toast-success",
+                description: message
+            });
+        } catch (error) {
+            console.error('Error occurred during logout:', error);
+            toast({
+                className: "shadcn-toast-failure",
+                description: 'An error occurred during logout. Please try again.'
+            });
+        }
+    };
+
     return (
         <div>
-
             <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r-[0.5px] border-gray-800 z-50 hidden lg:block">
-
-                <div className="px-4 py-6 ">
+                <div className="px-4 py-6">
                     <span className={`grid text-3xl font-semibold h-7 m-4 w-32 place-content-center rounded-lg text-blue-400`}>
                         Retweet
                     </span>
 
                     <ul className="mt-11 space-y-1">
                         <li>
-                            <a
-                                href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
-                            >
-                                <HomeIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Home
-                            </a>
+                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-700">
+                                <HomeIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Home
+                            </Link>
                         </li>
-
                     </ul>
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <a
-                                href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
-                            >
-                                <PlusIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Create
-                            </a>
+                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-700">
+                                <PlusIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Create
+                            </Link>
                         </li>
-
                     </ul>
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <a
-                                href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
-                            >
-                                <PersonIcon className="h-7 w-7 inline-flex pr-1 text-white" />  profile
-                            </a>
+                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-700">
+                                <PersonIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Profile
+                            </Link>
                         </li>
-
                     </ul>
-
-
-
-
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <a
-                                href="/"
-                                className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:bg-gray-100 hover:text-gray-700"
-                            >
-                                <ExitIcon className="h-7 w-7 inline-flex pr-1 text-white" />  Logout
-                            </a>
+                            {username ? (
+                                <span onClick={() => handleLogout()} className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-700">
+                                    <ExitIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Logout
+                                </span>
+                            ) : (
+                                <Link href="/sign-in" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-700">
+                                    <EnterIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Sign In
+                                </Link>
+                            )}
                         </li>
-
                     </ul>
                 </div>
             </div>
 
-            {/* bottom navbar */}
+            {/* Bottom Navbar */}
             <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-900 bg-black flex justify-around items-center p-2">
-                <a
-                    href="/"
-                    className="block rounded-lg px-4 py-2  hover:bg-gray-100"
-                >
+                <Link href="/" className="block rounded-lg px-4 py-2">
                     <HomeIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
-                </a>
+                </Link>
 
-                <a
-                    href="/"
-                    className="block rounded-lg px-4 py-2  hover:bg-gray-100"
-                >
+                <Link href="/" className="block rounded-lg px-4 py-2">
                     <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
-                </a>
+                </Link>
 
-                <a href="#" className="block px-4 py-2">
+                <span onClick={() => handleLogout()} className="block px-4 py-2">
                     <ExitIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
-
-                </a>
+                </span>
             </div>
-
         </div>
-
-
-    )
+    );
 }
-
