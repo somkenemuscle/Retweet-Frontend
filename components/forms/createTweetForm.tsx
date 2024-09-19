@@ -7,24 +7,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isBase64Image } from "@/lib/utils";
-import {
-    Form,
-    FormField,
-} from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { useUploadThing } from "@/lib/uploadthing";
 import axiosInstance from "@/lib/axiosInstance";
 import { useToast } from "@/hooks/use-toast";
 import { tweetFormSchema } from "@/lib/tweetSchema";
 import { AiOutlineFileImage } from "react-icons/ai";
+import { MdCancel } from "react-icons/md";
 
-
-// Main component
 function CreateInteractionForm({ action }: { action: string }) {
     const { startUpload } = useUploadThing("media");
     const router = useRouter();
     const { toast } = useToast();
     const [files, setFiles] = useState<File[]>([]);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof tweetFormSchema>>({
         resolver: zodResolver(tweetFormSchema),
@@ -43,9 +40,21 @@ function CreateInteractionForm({ action }: { action: string }) {
             fileReader.onload = () => {
                 const imageDataUrl = fileReader.result?.toString() || "";
                 fieldChange(imageDataUrl);
+                setImagePreview(imageDataUrl);
+                setFiles([file]);
             };
             fileReader.readAsDataURL(file);
-            setFiles([file]);
+        }
+    }
+
+    function handleRemoveImage(): void {
+        setImagePreview(null);
+        setFiles([]);
+        const imageInput = document.getElementById(
+            "image-input"
+        ) as HTMLInputElement;
+        if (imageInput) {
+            imageInput.value = "";
         }
     }
 
@@ -71,6 +80,7 @@ function CreateInteractionForm({ action }: { action: string }) {
             try {
                 form.reset();
                 setFiles([]);
+                setImagePreview(null);
                 const imageInput = document.getElementById(
                     "image-input"
                 ) as HTMLInputElement;
@@ -101,7 +111,7 @@ function CreateInteractionForm({ action }: { action: string }) {
     }
 
     return (
-        <div className="p-6  shadow-md max-w-lg mx-auto">
+        <div className="p-6 shadow-md max-w-lg mx-auto">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -120,23 +130,42 @@ function CreateInteractionForm({ action }: { action: string }) {
                         )}
                     />
 
-                    <div className="flex justify-between items-center">
-                        <FormField
-                            control={form.control}
-                            name="image"
-                            render={({ field }) => (
-                                <label className="cursor-pointer">
-                                    <AiOutlineFileImage className="w-6 h-6 text-blue-500" />
-                                    <input
-                                        id="image-input"
-                                        accept="image/*"
-                                        onChange={(e) => handleImage(e, field.onChange)}
-                                        type="file"
-                                        className="hidden"
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <FormField
+                                control={form.control}
+                                name="image"
+                                render={({ field }) => (
+                                    <label className="cursor-pointer flex items-center space-x-2">
+                                        <AiOutlineFileImage className="w-6 h-6 text-blue-500" />
+                                        <input
+                                            id="image-input"
+                                            accept="image/*"
+                                            onChange={(e) => handleImage(e, field.onChange)}
+                                            type="file"
+                                            className="hidden"
+                                        />
+                                    </label>
+                                )}
+                            />
+
+                            {imagePreview && (
+                                <div className="relative w-16 h-16 flex-shrink-0">
+                                    <img
+                                        src={imagePreview}
+                                        alt="Preview"
+                                        className="w-full h-full object-cover rounded-xl"
                                     />
-                                </label>
+                                    <button
+                                        type="button"
+                                        onClick={handleRemoveImage}
+                                        className="absolute top-0 right-0 p-1 bg-white rounded-full shadow-md"
+                                    >
+                                        <MdCancel className="w-4 h-4 text-red-500" />
+                                    </button>
+                                </div>
                             )}
-                        />
+                        </div>
 
                         <Button type="submit" className="px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
                             Post
