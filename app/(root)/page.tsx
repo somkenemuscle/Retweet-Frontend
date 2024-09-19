@@ -25,7 +25,7 @@ export default function Home() {
 
 
   return (
-    <div>
+    <div className="dd">
       <Navbar />
       <div className="cursor-pointer mt-2 mb-4 container mx-auto max-w-lg  p-0">
 
