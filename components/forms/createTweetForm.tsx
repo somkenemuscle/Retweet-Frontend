@@ -111,7 +111,7 @@ function CreateInteractionForm({ action }: { action: string }) {
     }
 
     return (
-        <div className="p-6 shadow-md max-w-full mx-auto bg-gray-800 rounded-xl border border-gray-700">
+        <div className="p-6 shadow-md max-w-full mx-auto  my-8 rounded-xl border border-gray-900">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -122,7 +122,7 @@ function CreateInteractionForm({ action }: { action: string }) {
                             <img
                                 src="/assets/images/prof.png"
                                 alt="profile-pic"
-                                className="w-10 h-10 rounded-full"
+                                className="w-10 h-9 rounded-full"
                             />
                         </div>
 
