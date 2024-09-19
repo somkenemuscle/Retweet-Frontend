@@ -10,7 +10,7 @@ export default function Navbar() {
             <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r-[0.5px] border-gray-800 z-50 hidden lg:block">
 
                 <div className="px-4 py-6 ">
-                    <span className={`grid text-3xl font-bold h-7 m-4 w-32 place-content-center rounded-lg text-amber-600`}>
+                    <span className={`grid text-3xl font-bold h-7 m-4 w-32 place-content-center rounded-lg text-blue-400`}>
                         Retweet
                     </span>
 
