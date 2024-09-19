@@ -97,7 +97,7 @@ export default function Home() {
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
                   <Image
-                    src='/assets/images/prof.jpg' 
+                    src='/assets/images/prof.png' 
                     alt="profilepic"
                     width={100}
                     height={100}
