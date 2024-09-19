@@ -111,24 +111,36 @@ function CreateInteractionForm({ action }: { action: string }) {
     }
 
     return (
-        <div className="p-6 shadow-md max-w-lg mx-auto">
+        <div className="p-6 shadow-md max-w-full mx-auto bg-gray-800 rounded-xl border border-gray-700">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
                     className="space-y-4"
                 >
-                    <FormField
-                        control={form.control}
-                        name="text"
-                        render={({ field }) => (
-                            <Textarea
-                                rows={3}
-                                {...field}
-                                placeholder="What's happening?"
-                                className="w-full px-4 py-3 border rounded-xl border-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
+                    <div className="flex">
+                        <div className="mr-4">
+                            <img
+                                src="/assets/images/prof.png"
+                                alt="profile-pic"
+                                className="w-10 h-10 rounded-full"
                             />
-                        )}
-                    />
+                        </div>
+
+                        <div className="w-full">
+                            <FormField
+                                control={form.control}
+                                name="text"
+                                render={({ field }) => (
+                                    <Textarea
+                                        rows={3}
+                                        {...field}
+                                        placeholder="What's happening?"
+                                        className="w-full px-4 py-3 border-none bg-gray-900 text-white rounded-xl focus:outline-none"
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
 
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -167,7 +179,7 @@ function CreateInteractionForm({ action }: { action: string }) {
                             )}
                         </div>
 
-                        <Button type="submit" className="px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
+                        <Button type="submit" className="ml-auto px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
                             Post
                         </Button>
                     </div>
