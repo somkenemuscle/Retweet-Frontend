@@ -69,7 +69,7 @@ export default function Navbar() {
             </div>
 
             {/* bottom navbar */}
-            <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-300 bg-white flex justify-around items-center p-2">
+            <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-900 bg-black flex justify-around items-center p-2">
                 <a
                     href="/"
                     className="block rounded-lg px-4 py-2  hover:bg-gray-100"
@@ -85,7 +85,7 @@ export default function Navbar() {
                 </a>
 
                 <a href="#" className="block px-4 py-2">
-                    Logout
+                    <ExitIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
 
                 </a>
             </div>
