@@ -115,12 +115,12 @@ function CreateInteractionForm({ action }: { action: string }) {
                                 rows={3}
                                 {...field}
                                 placeholder="What's happening?"
-                                className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring border-gray-800-[0.5px] focus:border-blue-300"
+                                className="w-full px-4 py-3 border rounded-xl border-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
                             />
                         )}
                     />
 
-                    <div className="flex items-center justify-between space-x-4">
+                    <div className="flex justify-between items-center">
                         <FormField
                             control={form.control}
                             name="image"
@@ -130,20 +130,18 @@ function CreateInteractionForm({ action }: { action: string }) {
                                     <input
                                         id="image-input"
                                         accept="image/*"
-                                        onChange={(e) => {
-                                            handleImage(e, field.onChange);
-                                        }}
+                                        onChange={(e) => handleImage(e, field.onChange)}
                                         type="file"
                                         className="hidden"
                                     />
                                 </label>
                             )}
                         />
-                    </div>
 
-                    <Button type="submit" className="w-full py-2 bg-blue-500 text-white rounded-lg">
-                        Submit
-                    </Button>
+                        <Button type="submit" className="px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
+                            Post
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
