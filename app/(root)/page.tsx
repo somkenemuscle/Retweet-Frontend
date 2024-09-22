@@ -5,9 +5,11 @@ import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
 import Navbar from "@/components/shared/Sidebar";
+import useTweetStore from "@/store/tweetStore";
+
 
 export default function Home() {
-  const [tweets, setTweets] = useState<Tweet[]>([]);
+  const { tweets, setTweets } = useTweetStore();
 
   async function getAllTweets() {
     try {
