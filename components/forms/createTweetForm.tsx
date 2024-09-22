@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { tweetFormSchema } from "@/lib/tweetSchema";
 import { AiOutlineFileImage } from "react-icons/ai";
 import { MdCancel } from "react-icons/md";
+import Loader from "../ui/Loader";
 
 function CreateInteractionForm({ action }: { action: string }) {
     const { startUpload } = useUploadThing("media");
@@ -22,6 +23,7 @@ function CreateInteractionForm({ action }: { action: string }) {
     const { toast } = useToast();
     const [files, setFiles] = useState<File[]>([]);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     const form = useForm<z.infer<typeof tweetFormSchema>>({
         resolver: zodResolver(tweetFormSchema),
@@ -59,6 +61,9 @@ function CreateInteractionForm({ action }: { action: string }) {
     }
 
     async function onSubmit(values: z.infer<typeof tweetFormSchema>) {
+
+        setLoading(true);
+
         const username = localStorage.getItem("username");
 
         if (values.image) {
@@ -106,6 +111,10 @@ function CreateInteractionForm({ action }: { action: string }) {
                 }
             } catch (error: any) {
                 console.error("Error occurred while making a tweet:", error);
+
+            } finally {
+                setLoading(false);
+
             }
         }
     }
@@ -180,7 +189,7 @@ function CreateInteractionForm({ action }: { action: string }) {
                         </div>
 
                         <Button type="submit" className="ml-auto px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
-                            Post
+                            Post {loading && <span className="ml-3"> <Loader /> </span>}
                         </Button>
                     </div>
                 </form>
