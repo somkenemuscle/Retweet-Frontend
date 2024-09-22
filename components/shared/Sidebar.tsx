@@ -44,7 +44,7 @@ export default function Navbar() {
                 <div className="px-4 py-6">
                     <span
                         className={`
-                            grid text-3xl font-semibold h-7 m-4 w-32 place-content-center 
+                            grid text-3xl font-extrabold h-7 m-4 w-32 place-content-center 
                             rounded-lg text-transparent bg-clip-text
                             bg-gradient-to-r from-blue-400 via-purple-400 to-slate-100
                             font-poppins`}>Retweet </span>
