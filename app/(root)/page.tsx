@@ -1,63 +1,42 @@
-'use client';
-
+'use client'
 import CreateInteractionForm from "@/components/forms/createTweetForm";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
 import Navbar from "@/components/shared/Sidebar";
 import useTweetStore from "@/store/tweetStore";
-import { useInView } from "react-intersection-observer";
 
 
 export default function Home() {
-  const { tweets, setTweets } = useTweetStore((state: any) => ({
-    tweets: state.tweets,
-    setTweets: state.setTweets,
-  }));
+  const { tweets, setTweets } = useTweetStore();
 
-  const [page, setPage] = useState<number>(1); // Explicitly type as number
-  const [loading, setLoading] = useState<boolean>(false); // Track loading state
-  const [hasMore, setHasMore] = useState<boolean>(true); // Track if there are more tweets to load
-
-  // Intersection Observer to detect when the user reaches the bottom of the page
-  const { ref, inView } = useInView({
-    threshold: 0.5, // Load more tweets when the user is 50% near the bottom
-  });
-
-  // Fetch tweets from the backend with pagination
-  async function getTweets(page: number) {
+  async function getAllTweets() {
     try {
-      setLoading(true); // Start loading
-      const res = await axiosInstance.get(`/tweets?page=${page}&limit=10`);
-      if (res.data.length > 0) {
-        // Append new tweets
-        setTweets((prevTweets: Tweet[]) => [...prevTweets, ...res.data]);
-      } else {
-        setHasMore(false); // No more tweets to load
-      }
-      setLoading(false); // End loading
+      const res = await axiosInstance.get('/tweets');
+      setTweets(res.data)
     } catch (error) {
-      console.log(error);
-      setLoading(false);
+      console.log(error)
     }
   }
 
-  // Fetch tweets on the first load and when the user scrolls to the bottom
   useEffect(() => {
-    if (inView && hasMore && !loading) {
-      getTweets(page); // Fetch next page of tweets
-      setPage((prevPage) => prevPage + 1); // Increment page number for next fetch
-    }
-  }, [inView, hasMore, loading]);
+    getAllTweets();
+  }, []);
+
+
 
   return (
     <div className="dd">
       <Navbar />
-      <div className="cursor-pointer mt-2 mb-4 container mx-auto max-w-lg p-0">
-        <CreateInteractionForm action="Add" />
-        <ul className="flex flex-col mb-20">
-          {tweets.map((tweet: Tweet) => (
+      <div className="cursor-pointer mt-2 mb-4 container mx-auto max-w-lg  p-0">
+
+        <CreateInteractionForm
+          action="Add"
+        />
+
+        <ul className="flex flex-col mb-20 ">
+          {tweets.map((tweet) => (
             <li key={tweet._id} className="border-gray-900 rounded-xl flex p-4 border-[0.5px]">
               <div className="flex flex-col flex-grow">
                 <div className="flex items-center mb-2">
@@ -70,7 +49,7 @@ export default function Home() {
                     priority
                   />
                   <p className="text-white">
-                    {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span> <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
+                    {tweet.author.username} <span className="text-gray-500">@{tweet.author.username}.</span>  <span className="text-gray-500 text-sm">{new Date(tweet.createdAt).toLocaleDateString()}</span>
                   </p>
                 </div>
 
@@ -93,15 +72,29 @@ export default function Home() {
             </li>
           ))}
         </ul>
-
-        {/* Loading Spinner */}
-        {loading && <p className="text-center text-gray-500">Loading more tweets...</p>}
-
-        {/* Empty space to detect the scroll */}
-        <div ref={ref} className="infinite-scroll-trigger h-10"></div>
-
-        {!hasMore && <p className="text-center text-gray-500">No more tweets to load.</p>}
       </div>
+
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
