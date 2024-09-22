@@ -1,6 +1,6 @@
 'use client'
 import CreateInteractionForm from "@/components/forms/createTweetForm";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";

@@ -16,8 +16,11 @@ import { tweetFormSchema } from "@/lib/tweetSchema";
 import { AiOutlineFileImage } from "react-icons/ai";
 import { MdCancel } from "react-icons/md";
 import Loader from "../ui/Loader";
+import useTweetStore from "@/store/tweetStore";
+
 
 function CreateInteractionForm({ action }: { action: string }) {
+    const { setTweets } = useTweetStore();
     const { startUpload } = useUploadThing("media");
     const router = useRouter();
     const { toast } = useToast();
@@ -60,6 +63,15 @@ function CreateInteractionForm({ action }: { action: string }) {
         }
     }
 
+    async function getAllTweets() {
+        try {
+            const res = await axiosInstance.get('/tweets');
+            setTweets(res.data)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     async function onSubmit(values: z.infer<typeof tweetFormSchema>) {
 
         setLoading(true);
@@ -98,11 +110,13 @@ function CreateInteractionForm({ action }: { action: string }) {
                         text: values?.text,
                         image: values?.image,
                     });
+                    getAllTweets();
                     const { message } = res.data;
                     toast({
                         className: "shadcn-toast-success",
                         description: message,
                     });
+
                 } else {
                     toast({
                         className: "shadcn-toast-failure",
