@@ -2,7 +2,7 @@ import '../test.css'
 
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
     return (
-        <main>
+        <main  style={{ backgroundColor: 'black', color: 'white' }}>
             {children}
         </main>
     );
