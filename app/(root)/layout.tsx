@@ -1,4 +1,4 @@
-import '../test.css'
+import '../home.css'
 
 export default function RootLayout({ children, }: Readonly<{ children: React.ReactNode; }>) {
     return (
