@@ -100,8 +100,15 @@ export default function Navbar() {
                     <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
                 </Link>
 
-                <span onClick={() => handleLogout()} className="block px-4 py-2">
-                    <ExitIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
+                <span className="block px-4 py-2">
+                    {username ? (
+                        <ExitIcon onClick={() => handleLogout()} className="h-7 w-7 inline-flex pr-1 text-gray-500" />
+                    ) : (
+                        <Link href="/sign-in">
+                            <PersonIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                        </Link>
+                    )}
+
                 </span>
             </div>
         </div>
