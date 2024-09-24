@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import axiosInstance from "@/lib/axiosInstance";
 import Image from "next/image";
-import Navbar from "@/components/shared/Sidebar";
 import useTweetStore from "@/store/tweetStore";
 
 
@@ -28,7 +27,6 @@ export default function Home() {
 
   return (
     <div className="dd">
-      <Navbar />
       <div className="cursor-pointer mt-2 mb-4 container mx-auto max-w-lg  p-0">
 
         <CreateInteractionForm
