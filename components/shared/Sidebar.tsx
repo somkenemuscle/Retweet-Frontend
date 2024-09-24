@@ -61,7 +61,7 @@ export default function Navbar() {
                     <ul className="mt-7 space-y-1">
                         <li>
                             <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
-                                <PlusIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Create Post
+                                <PlusIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Create
                             </Link>
                         </li>
                     </ul>
