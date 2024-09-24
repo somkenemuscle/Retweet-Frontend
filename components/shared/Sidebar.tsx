@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
 
-export default function Navbar() {
+export default function Sidebar() {
     const router = useRouter();
 
     const [username, setUsername] = useState('');

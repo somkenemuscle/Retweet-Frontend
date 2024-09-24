@@ -10,3 +10,12 @@ interface Tweet {
     updatedAt: string;
   }
   
+
+
+  interface TweetCardProps {
+   id: string;
+   username: string;
+   text?: string;
+   image?: string; // optional
+   createdAt: string; // include createdAt prop
+}
