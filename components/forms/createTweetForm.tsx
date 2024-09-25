@@ -230,7 +230,6 @@ function CreateInteractionForm({ action }: { action: string }) {
                                     <div className="absolute z-10">
                                         <EmojiPicker
                                             onEmojiClick={handleEmojiClick}
-                                            theme='dark'
                                         />
                                     </div>
                                 )}
