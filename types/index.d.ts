@@ -21,6 +21,7 @@ interface Tweet {
 
 
 
+
 interface TweetCardProps {
    id: string;
    username: string;

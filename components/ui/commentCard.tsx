@@ -1,5 +1,6 @@
 import Image from "next/image"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 
 import {
     faComment,
@@ -23,13 +24,19 @@ function CommentCard({ username, text, createdAt }: CommentCardProps) {
                             quality={100}
                             priority
                         />
-                        <p className="text-white">
-                            {username}  <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />  <span className="text-gray-500">@{username}.</span>  <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
-                        </p>
+                        <Link href={`/${username}`}>
+                            <p className="text-white">
+                                <span className="hover:underline">{username} </span> <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />  <span className="text-gray-500">@{username}.</span>  <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
+                            </p>
+                        </Link>
                     </div>
 
                     <h4 className="text-md font-normal mb-2">{text}</h4>
+                    <div>
+                        <FontAwesomeIcon icon={faHeart} style={{ fontSize: 17, color: '#ef4444' }} /> <span className="ml-1 text-sm text-gray-100 font-medium">10k Likes</span>
+                    </div>
                 </div>
+
             </li>
         </>
     )

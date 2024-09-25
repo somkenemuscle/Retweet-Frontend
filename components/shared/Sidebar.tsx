@@ -1,5 +1,6 @@
 import React from 'react'
 import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/react-icons';
+import { Save, Bookmark } from 'react-feather';
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from "@/hooks/use-toast";
@@ -52,7 +53,7 @@ export default function Sidebar() {
 
                     <ul className="mt-11 space-y-1">
                         <li>
-                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
+                            <Link href="/" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
                                 <HomeIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Home
                             </Link>
                         </li>
@@ -60,7 +61,7 @@ export default function Sidebar() {
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
+                            <Link href="/" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
                                 <PlusIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Create
                             </Link>
                         </li>
@@ -68,20 +69,32 @@ export default function Sidebar() {
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <Link href="/" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
-                                <PersonIcon className="h-6 w-6 inline-flex pr-1 text-white" />  {username ? username : 'Sign Up'}
+                            <Link href={`/${username}`} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
+                                <PersonIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Profile
                             </Link>
                         </li>
                     </ul>
 
                     <ul className="mt-7 space-y-1">
                         <li>
+                            <Link
+                                href={username ? `/${username}/saved-posts` : '/'}
+                                className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800"
+                            >
+                                <Bookmark className="h-6 w-6 inline-flex pr-1 text-white" /> Saves
+                            </Link>
+
+                        </li>
+                    </ul>
+
+                    <ul className="mt-7 space-y-1">
+                        <li>
                             {username ? (
-                                <span onClick={() => handleLogout()} className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
+                                <span onClick={() => handleLogout()} className="block rounded-2xl px-5 py-2 text-lg  font-semibold text-white hover:bg-gray-800 cursor-pointer">
                                     <ExitIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Logout
                                 </span>
                             ) : (
-                                <Link href="/sign-in" className="block rounded-lg px-5 py-2 text-lg font-semibold text-white hover:text-gray-300">
+                                <Link href="/sign-in" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
                                     <EnterIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Sign In
                                 </Link>
                             )}
@@ -111,6 +124,6 @@ export default function Sidebar() {
 
                 </span>
             </div>
-        </div>
+        </div >
     );
 }
