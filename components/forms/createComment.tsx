@@ -148,7 +148,6 @@ function CreateCommentForm({ action, tweetId }: { action: string, tweetId: strin
                                 <div className="absolute z-10">
                                     <EmojiPicker
                                         onEmojiClick={handleEmojiClick}
-                                        theme='dark'
                                     />
                                 </div>
                             )}
