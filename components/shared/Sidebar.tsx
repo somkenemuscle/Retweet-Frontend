@@ -1,6 +1,6 @@
 import React from 'react'
 import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/react-icons';
-import { Save, Bookmark } from 'react-feather';
+import { Bookmark } from 'react-feather';
 import { useEffect, useState } from 'react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from "@/hooks/use-toast";
@@ -106,22 +106,25 @@ export default function Sidebar() {
             {/* Bottom Navbar */}
             <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-900 bg-black flex justify-around items-center p-2">
                 <Link href="/" className="block rounded-lg px-4 py-2">
-                    <HomeIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
+                    <HomeIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                </Link>
+
+                <Link href={username ? `/${username}/saved-posts` : '/'} className="block rounded-lg px-4 py-2">
+                    <Bookmark className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </Link>
 
                 <Link href="/" className="block rounded-lg px-4 py-2">
-                    <PlusIcon className="h-7 w-7 inline-flex pr-1 text-gray-500" />
+                    <PlusIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                </Link>
+
+                <Link href={`/${username}`} className="block rounded-lg px-4 py-2">
+                    <PersonIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </Link>
 
                 <span className="block px-4 py-2">
-                    {username ? (
-                        <ExitIcon onClick={() => handleLogout()} className="h-7 w-7 inline-flex pr-1 text-gray-500" />
-                    ) : (
-                        <Link href="/sign-in">
-                            <PersonIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
-                        </Link>
+                    {username && (
+                        <ExitIcon onClick={() => handleLogout()} className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                     )}
-
                 </span>
             </div>
         </div >
