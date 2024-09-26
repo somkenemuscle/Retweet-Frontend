@@ -1,24 +1,55 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/react-icons';
 import { Bookmark } from 'react-feather';
-import { useEffect, useState } from 'react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Link from 'next/link';
+import CreateInteractionForm from '../forms/createTweetForm';
+import { useDialogStore } from '@/store/dialogStore';
+
 
 export default function Sidebar() {
     const router = useRouter();
-
     const [username, setUsername] = useState('');
     const { toast } = useToast();
+    const { isDialogOpen, setIsDialogOpen } = useDialogStore();
+    const dialogRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
+    const toggleDialog = () => {
+        setIsDialogOpen(!isDialogOpen);
+    };
+
+    const handleClickOutside = (event: MouseEvent) => {
+        if (dialogRef.current && !dialogRef.current.contains(event.target as Node)) {
+            setIsDialogOpen(false);
+        }
+    };
+
+    function GetUsername() {
         const username = localStorage.getItem('username');
         if (username) {
             setUsername(username);
         }
-    }, []);
+    }
+
+    function CheckForDialog() {
+        if (isDialogOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }
+    useEffect(() => {
+        GetUsername();
+        CheckForDialog();
+    }, [isDialogOpen]);
+
+
 
     const handleLogout = async () => {
         try {
@@ -39,6 +70,7 @@ export default function Sidebar() {
         }
     };
 
+
     return (
         <div>
             <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r-[0.5px] border-gray-800 z-50 hidden lg:block">
@@ -50,7 +82,6 @@ export default function Sidebar() {
                             bg-gradient-to-r from-blue-400 via-purple-400 to-slate-100
                             font-poppins`}>Retweet </span>
 
-
                     <ul className="mt-11 space-y-1">
                         <li>
                             <Link href="/" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
@@ -61,9 +92,10 @@ export default function Sidebar() {
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <Link href="/" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
+                            {/* Clicking this will trigger the dialog */}
+                            <span onClick={toggleDialog} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
                                 <PlusIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Create
-                            </Link>
+                            </span>
                         </li>
                     </ul>
 
@@ -83,14 +115,13 @@ export default function Sidebar() {
                             >
                                 <Bookmark className="h-6 w-6 inline-flex pr-1 text-white" /> Saves
                             </Link>
-
                         </li>
                     </ul>
 
                     <ul className="mt-7 space-y-1">
                         <li>
                             {username ? (
-                                <span onClick={() => handleLogout()} className="block rounded-2xl px-5 py-2 text-lg  font-semibold text-white hover:bg-gray-800 cursor-pointer">
+                                <span onClick={handleLogout} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
                                     <ExitIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Logout
                                 </span>
                             ) : (
@@ -103,6 +134,25 @@ export default function Sidebar() {
                 </div>
             </div>
 
+            {/* Dialog Box */}
+            {isDialogOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div
+                        ref={dialogRef} // Reference to the dialog content
+                        className="relative bg-gray-950 rounded-xl p-4 w-[550px] max-w-[90vw]"
+                    >
+                        <button
+                            onClick={toggleDialog}
+                            className="absolute top-2 right-4 text-gray-600 hover:text-red-900"
+                        >
+                            x
+                        </button>
+                        <h2 className="text-lg font-bold mb-4 text-gray-500">Make a post!</h2>
+                        {/* Render your form here */}
+                        <CreateInteractionForm action="Add" />
+                    </div>
+                </div>)}
+
             {/* Bottom Navbar */}
             <div className="lg:hidden fixed bottom-0 inset-x-0 border-t border-gray-900 bg-black flex justify-around items-center p-2">
                 <Link href="/" className="block rounded-lg px-4 py-2">
@@ -113,20 +163,26 @@ export default function Sidebar() {
                     <Bookmark className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </Link>
 
-                <Link href="/" className="block rounded-lg px-4 py-2">
+                <span onClick={toggleDialog} className="block rounded-lg px-4 py-2 cursor-pointer">
                     <PlusIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
-                </Link>
+                </span>
 
                 <Link href={`/${username}`} className="block rounded-lg px-4 py-2">
                     <PersonIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </Link>
 
-                <span className="block px-4 py-2">
-                    {username && (
-                        <ExitIcon onClick={() => handleLogout()} className="h-6 w-6 inline-flex pr-1 text-gray-500" />
-                    )}
-                </span>
+                {username ? (
+                    <span className="block px-4 py-2">
+                        <ExitIcon onClick={handleLogout} className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                    </span>
+                ) : (
+                    <span className="block px-4 py-2">
+                        <Link href="/sign-in">
+                            <EnterIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                        </Link>
+                    </span>
+                )}
             </div>
-        </div >
+        </div>
     );
 }

@@ -75,10 +75,10 @@ function TweetSaves() {
 
   return (
     <div className="cursor-pointer mt-9 mb-24 container mx-auto max-w-lg p-0">
-      <div className='border border-slate-900 p-3 mb-4 rounded-xl'>
+      <div className='border border-slate-900 p-3 mb-4 rounded-none sm:rounded-xl'>
         <Link href={'/'}>
-          <span className='hover:bg-gray-700 transition rounded-full p-2' aria-hidden="true">←</span>
-          <span className='ml-8 text-gray-300'> {username ? "Saved Posts" : 'Account Not Found'}</span>
+          <span className='hover:bg-gray-700 text-gray-500 transition rounded-full p-2' aria-hidden="true">←</span>
+          <span className='ml-8 text-gray-500 font-semibold'> {username ? `@${username} saved posts` : 'Account Not Found'}</span>
         </Link>
       </div>
 

@@ -71,9 +71,8 @@ function TweetCard({ id, username, text, image, createdAt }: TweetCardProps) {
 
     return (
         <>
-            <li className="border-gray-900 rounded-xl flex p-4 border-[0.5px] cursor-pointer">
+            <li className="border-gray-900 rounded-none hover:bg-neutral-950 sm:rounded-xl flex p-4 border-[0.5px] cursor-pointer">
                 <div className="flex flex-col flex-grow">
-
                     <div className="flex items-center mb-2">
                         <Image
                             src='/assets/images/prof.png'
@@ -120,7 +119,7 @@ function TweetCard({ id, username, text, image, createdAt }: TweetCardProps) {
                     </div>
                     <span className="mt-3 text-sm text-gray-100 font-medium">14,350 Likes</span>
                 </div>
-            </li >
+            </li>
         </>
     )
 }

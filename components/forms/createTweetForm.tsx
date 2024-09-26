@@ -19,6 +19,8 @@ import Loader from "../ui/Loader";
 import useTweetStore from "@/store/tweetStore";
 import EmojiPicker from 'emoji-picker-react'; // Import the emoji picker
 import { FaSmile } from "react-icons/fa"; // Import the smile icon
+import { useDialogStore } from '@/store/dialogStore';
+
 
 function CreateInteractionForm({ action }: { action: string }) {
     const { setTweets } = useTweetStore();
@@ -28,6 +30,7 @@ function CreateInteractionForm({ action }: { action: string }) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker state
+    const { setIsDialogOpen } = useDialogStore();
 
 
     const form = useForm<z.infer<typeof tweetFormSchema>>({
@@ -127,8 +130,10 @@ function CreateInteractionForm({ action }: { action: string }) {
                         text: values?.text,
                         image: values?.image,
                     });
+
                     getAllTweets();
                     const { message } = res.data;
+                    setIsDialogOpen(false);
                     toast({
                         className: "shadcn-toast-success",
                         description: message,
@@ -150,7 +155,7 @@ function CreateInteractionForm({ action }: { action: string }) {
 
 
     return (
-        <div className="p-6 shadow-md max-w-full mx-auto my-8 rounded-xl border border-gray-900">
+        <div className="p-6 shadow-md max-w-full mx-auto my-8 rounded-none sm:rounded-xl border border-gray-900">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
