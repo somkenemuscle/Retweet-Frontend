@@ -92,7 +92,7 @@ function TweetId() {
                 image={tweet.image}
                 text={tweet.text}
                 createdAt={tweet.createdAt}
-                likes={tweet.likes}
+                likes={tweet.likes} 
                 verification={tweet.author.verification}
             />
 

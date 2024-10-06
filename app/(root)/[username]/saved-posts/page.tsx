@@ -96,6 +96,8 @@ function TweetSaves() {
               text={tweet.text}
               createdAt={tweet.createdAt}
               verification={tweet.author.verification}
+              likes={tweet.likes}
+
             />
           ))
         )}
