@@ -38,8 +38,8 @@ export default function SignUpForm() {
     };
 
 
-    const form = useForm<z.infer<typeof SignUpFormSchema >>({
-        resolver: zodResolver(SignUpFormSchema ),
+    const form = useForm<z.infer<typeof SignUpFormSchema>>({
+        resolver: zodResolver(SignUpFormSchema),
         defaultValues: {
             username: "",
             email: "",
@@ -59,7 +59,7 @@ export default function SignUpForm() {
     };
 
 
-    async function onSubmit(values: z.infer<typeof SignUpFormSchema >) {
+    async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
         try {
             if (!recaptchaToken) {
                 toast({

@@ -3,15 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 import {
-    faComment,
     faCircleCheck,
     faHeart,
-    faSave
 } from "@fortawesome/free-solid-svg-icons";
-function CommentCard({ username, text, createdAt }: CommentCardProps) {
+function CommentCard({ username, text, createdAt, verification }: CommentCardProps) {
 
     return (
-        <>
+        <span>
             <li className="border-gray-900 rounded-xl flex p-4 border-[0.5px]">
                 <div className="flex flex-col flex-grow">
                     <div className="flex items-center mb-2">
@@ -26,7 +24,9 @@ function CommentCard({ username, text, createdAt }: CommentCardProps) {
                         />
                         <Link href={`/${username}`}>
                             <p className="text-white">
-                                <span className="hover:underline">{username} </span> <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />  <span className="text-gray-500">@{username}.</span>  <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
+                                <span className="hover:underline">{username} </span>
+                                {verification && (<FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />)}
+                                <span className="text-gray-500"> @{username}.</span>  <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
                             </p>
                         </Link>
                     </div>
@@ -38,7 +38,7 @@ function CommentCard({ username, text, createdAt }: CommentCardProps) {
                 </div>
 
             </li>
-        </>
+        </span>
     )
 }
 

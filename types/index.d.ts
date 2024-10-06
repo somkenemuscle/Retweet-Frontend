@@ -4,7 +4,8 @@ interface Tweet {
    image?: string;
    author: {
       username: string;
-   }// Assuming `author` is just the ObjectId as a string
+      verification: boolean;
+   }
    comments: [
       {
          _id: string;
@@ -12,11 +13,15 @@ interface Tweet {
          author: {
             _id: string;
             username: string;
+            verification: boolean;
          }
       }
    ];
    createdAt: string;
    updatedAt: string;
+   likes: {
+      username: string;
+   }[];
 }
 
 
@@ -28,12 +33,17 @@ interface TweetCardProps {
    text?: string;
    image?: string; // optional
    createdAt: string; // include createdAt prop
+   likes: {
+      username: string;
+   }[];
+   verification: boolean;
 }
 
 interface CommentCardProps {
    username: string;
    text: string;
    createdAt: string; // include createdAt prop
+   verification: boolean;
 }
 
 

@@ -4,8 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Retweet",
-  description: "The modern blog application",
+  description: "The modern social media application",
 };
+
 
 export default function RootLayout({
   children,

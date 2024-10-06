@@ -3,14 +3,12 @@ import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/r
 import { Bookmark } from 'react-feather';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import CreateInteractionForm from '../forms/createTweetForm';
 import { useDialogStore } from '@/store/dialogStore';
 
 
 export default function Sidebar() {
-    const router = useRouter();
     const [username, setUsername] = useState('');
     const { toast } = useToast();
     const { isDialogOpen, setIsDialogOpen } = useDialogStore();
@@ -53,7 +51,6 @@ export default function Sidebar() {
 
     const handleLogout = async () => {
         try {
-            router.push('/sign-in');
             const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
             const { message } = res.data;
             localStorage.removeItem('username');
@@ -75,12 +72,15 @@ export default function Sidebar() {
         <div>
             <div className="fixed top-0 left-0 h-screen w-64 bg-black border-r-[0.5px] border-gray-800 z-50 hidden lg:block">
                 <div className="px-4 py-6">
-                    <span
-                        className={`
+                    <Link href="/">
+
+                        <span
+                            className={`
                             grid text-3xl font-extrabold h-7 m-4 w-32 place-content-center 
                             rounded-lg text-transparent bg-clip-text
                             bg-gradient-to-r from-blue-400 via-purple-400 to-slate-100
                             font-poppins`}>Retweet </span>
+                    </Link>
 
                     <ul className="mt-11 space-y-1">
                         <li>
@@ -121,9 +121,12 @@ export default function Sidebar() {
                     <ul className="mt-7 space-y-1">
                         <li>
                             {username ? (
-                                <span onClick={handleLogout} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
-                                    <ExitIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Logout
-                                </span>
+                                <Link href={'/sign-in'}>
+                                    <span onClick={handleLogout} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
+                                        <ExitIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Logout
+                                    </span>
+                                </Link>
+
                             ) : (
                                 <Link href="/sign-in" className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800 cursor-pointer">
                                     <EnterIcon className="h-5 w-6 inline-flex pr-1 text-white" />  Sign In
@@ -136,10 +139,10 @@ export default function Sidebar() {
 
             {/* Dialog Box */}
             {isDialogOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50">
                     <div
                         ref={dialogRef} // Reference to the dialog content
-                        className="relative bg-gray-950 rounded-xl p-4 w-[550px] max-w-[90vw]"
+                        className="relative bg-black rounded-xl p-4 w-[550px] max-w-[90vw]"
                     >
                         <button
                             onClick={toggleDialog}
@@ -147,7 +150,7 @@ export default function Sidebar() {
                         >
                             x
                         </button>
-                        <h2 className="text-lg font-bold mb-4 text-gray-500">Make a post!</h2>
+                        <h2 className="text-lg font-bold mb-4 text-gray-200">Make a post</h2>
                         {/* Render your form here */}
                         <CreateInteractionForm action="Add" />
                     </div>
@@ -173,7 +176,9 @@ export default function Sidebar() {
 
                 {username ? (
                     <span className="block px-4 py-2">
-                        <ExitIcon onClick={handleLogout} className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                        <Link href={'/sign-in'}>
+                            <ExitIcon onClick={handleLogout} className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                        </Link>
                     </span>
                 ) : (
                     <span className="block px-4 py-2">

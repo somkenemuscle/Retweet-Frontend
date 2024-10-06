@@ -92,6 +92,8 @@ function TweetId() {
                 image={tweet.image}
                 text={tweet.text}
                 createdAt={tweet.createdAt}
+                likes={tweet.likes}
+                verification={tweet.author.verification}
             />
 
 
@@ -103,6 +105,7 @@ function TweetId() {
                     username={comment.author.username}
                     text={comment.comment}
                     createdAt={tweet.createdAt}
+                    verification={comment.author.verification}
                 />
             ))}
 

@@ -13,11 +13,14 @@ import { useToast } from "@/hooks/use-toast";
 function TweetSaves() {
   const { toast } = useToast();
   const [SavedTweets, setSavedTweets] = useState<Tweet[]>([]);
+  const [loading, setLoading] = useState<boolean>(true); // Add loading state
   const params = useParams();
   const username = params.username;
 
+
   async function getSavedTweets() {
     try {
+      setLoading(true); // Start loading when fetching tweets
       const res = await axiosInstance.get(`/tweets/${username}/saves`);
       setSavedTweets(res.data.savedTweets);
     } catch (error: any) {
@@ -51,6 +54,8 @@ function TweetSaves() {
         className: "shadcn-toast-failure",
         description: errorMessage
       });
+    } finally {
+      setLoading(false); // Stop loading after fetching or error
     }
   }
 
@@ -61,16 +66,6 @@ function TweetSaves() {
     }
   }, []);
 
-
-  if (SavedTweets.length === 0) {
-    return (
-      <div className="flex justify-center items-center mt-44">
-        <span>
-          <Loader />
-        </span>
-      </div>
-    );
-  }
 
 
   return (
@@ -83,11 +78,13 @@ function TweetSaves() {
       </div>
 
       <ul className="flex flex-col mb-20">
-        {SavedTweets.length === 0 ? (
+        {loading ? (
           <div className="flex justify-center items-center mt-10">
-            <span>
-              <Loader />
-            </span>
+            <Loader />
+          </div>
+        ) : SavedTweets.length === 0 ? (
+          <div className="flex justify-center items-center mt-10">
+            <span className='text-gray-400 mt-36'>You have not saved any post yet</span>
           </div>
         ) : (
           SavedTweets.map((tweet) => (
@@ -98,6 +95,7 @@ function TweetSaves() {
               image={tweet.image}
               text={tweet.text}
               createdAt={tweet.createdAt}
+              verification={tweet.author.verification}
             />
           ))
         )}

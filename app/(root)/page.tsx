@@ -56,6 +56,8 @@ export default function Home() {
                 image={tweet.image}
                 text={tweet.text}
                 createdAt={tweet.createdAt}
+                verification={tweet.author.verification}
+                likes={tweet.likes}
               />
             ))
           )}

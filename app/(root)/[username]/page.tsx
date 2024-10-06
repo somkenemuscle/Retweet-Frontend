@@ -17,44 +17,37 @@ import Image from 'next/image';
 function TweetId() {
     const { toast } = useToast();
     const [UsersTweets, setUsersTweets] = useState<Tweet[]>([]);
+    const [loading, setLoading] = useState<boolean>(true); // Add loading state
     const params = useParams();
     const username = params.username;
 
+
     async function getTweet() {
         try {
+            setLoading(true); // Start loading when fetching tweets
             const res = await axiosInstance.get(`/tweets/user/${username}`);
             setUsersTweets(res.data);
         } catch (error: any) {
-            console.error('Error occurred during signin:', error);
+            console.error('Error occurred during fetching tweets:', error);
 
-            // Default error message
             let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
             if (axios.isAxiosError(error)) {
-                // Check for a response error
                 if (error.response) {
-                    // Extract message from response if available
                     const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
+                    errorMessage = responseMessage ? responseMessage : error.response.data?.message || errorMessage;
                 } else {
-                    // Handle cases where no response is available (e.g., network errors)
                     errorMessage = 'Network error. Please try again.';
                 }
             } else {
-                // Handle unexpected error types
                 errorMessage = 'An unexpected error occurred. Please try again later.';
             }
 
-            // Show error toast notification
             toast({
                 className: "shadcn-toast-failure",
                 description: errorMessage
             });
+        } finally {
+            setLoading(false); // Stop loading after fetching or error
         }
     }
 
@@ -64,17 +57,6 @@ function TweetId() {
             getTweet();
         }
     }, []);
-
-
-    if (!UsersTweets) {
-        return (
-            <div className="flex justify-center items-center mt-44">
-                <span>
-                    <Loader />
-                </span>
-            </div>
-        );
-    }
 
 
     return (
@@ -110,11 +92,16 @@ function TweetId() {
             </div>
 
 
+            {/* Tweets Section */}
             <ul className="flex flex-col mb-20">
-                {UsersTweets.length === 0 ? (
+                {loading ? (
+                    <div className="flex justify-center items-center mt-10">
+                        <Loader />
+                    </div>
+                ) : UsersTweets.length === 0 ? (
                     <div className="flex justify-center items-center mt-10">
                         <span>
-                            <Loader />
+                            <p className='text-gray-400 mt-24'>No post has been made yet</p>
                         </span>
                     </div>
                 ) : (
@@ -126,12 +113,13 @@ function TweetId() {
                             image={tweet.image}
                             text={tweet.text}
                             createdAt={tweet.createdAt}
+                            likes={tweet.likes}
+                            verification={tweet.author.verification}
+
                         />
                     ))
                 )}
             </ul>
-
-
         </div>
     );
 }
