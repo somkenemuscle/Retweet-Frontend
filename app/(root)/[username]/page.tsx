@@ -14,6 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import Image from 'next/image';
 
+
 function TweetId() {
     const { toast } = useToast();
     const [UsersTweets, setUsersTweets] = useState<Tweet[]>([]);
@@ -57,6 +58,77 @@ function TweetId() {
             getTweet();
         }
     }, []);
+
+
+    const handleLikes = async (tweetId: string) => {
+        // Get the logged-in username from localStorage
+        const loggedInUsername = localStorage.getItem('username');
+        // Ensure the loggedInUsername is a string and not null
+        if (!loggedInUsername) {
+            console.error('No logged-in user found.');
+            return;
+        }
+        // Find the tweet in the state
+        const tweetIndex = UsersTweets.findIndex((tweets) => tweets._id === tweetId);
+        if (tweetIndex === -1) return; // If tweet is not found, return early
+
+        const tweet = UsersTweets[tweetIndex];
+
+        // Check if the current user has already liked the tweet
+        const userAlreadyLiked = tweet.likes.some((like) => like.username === loggedInUsername);
+
+        // Optimistically update the UI
+        const updatedLikes = userAlreadyLiked
+            ? tweet.likes.filter((like) => like.username !== loggedInUsername)  // Unlike
+            : [...tweet.likes, { username: loggedInUsername }];  // Like
+
+        // Update the state optimistically
+        const updatedTweets = [...UsersTweets];
+        updatedTweets[tweetIndex] = {
+            ...tweet,
+            likes: updatedLikes
+        };
+        setUsersTweets(updatedTweets);  // Update the state with optimistic changes
+
+
+        try {
+            const res = await axiosInstance.post(`/tweets/${tweetId}/like`);
+            console.log(res.data)
+
+        } catch (error: any) {
+            console.error('Error occurred during signin:', error);
+
+            // Default error message
+            let errorMessage = 'An error occurred. Please try again.';
+
+            // Check if the error is an Axios error
+            if (axios.isAxiosError(error)) {
+                // Check for a response error
+                if (error.response) {
+                    // Extract message from response if available
+                    const responseMessage = error.response.data?.error;
+                    if (responseMessage) {
+                        errorMessage = responseMessage;
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
+                } else {
+                    // Handle cases where no response is available (e.g., network errors)
+                    errorMessage = 'Network error. Please try again.';
+                }
+            } else {
+                // Handle unexpected error types
+                errorMessage = 'An unexpected error occurred. Please try again later.';
+            }
+
+            // Show error toast notification
+            toast({
+                className: "shadcn-toast-failure",
+                description: errorMessage
+            });
+        }
+    };
+
 
 
     return (
@@ -115,6 +187,7 @@ function TweetId() {
                             createdAt={tweet.createdAt}
                             likes={tweet.likes}
                             verification={tweet.author.verification}
+                            handleLikes={handleLikes}
 
                         />
                     ))

@@ -4,7 +4,6 @@ import Link from "next/link"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axiosInstance from "@/lib/axiosInstance";
 import { useToast } from "@/hooks/use-toast";
-import useTweetStore from "@/store/tweetStore";
 import axios from "axios";
 import {
     faComment,
@@ -13,9 +12,10 @@ import {
     faBookmark
 } from "@fortawesome/free-solid-svg-icons";
 
-function TweetCard({ id, username, text, image, createdAt, likes, verification }: TweetCardProps) {
+function TweetCard({ id, username, text, image, createdAt, likes, verification, handleLikes }: TweetCardProps) {
     const { toast } = useToast();
-    const { tweets, setTweets } = useTweetStore();
+
+
     const loggedInUsername = localStorage.getItem('username');
 
     // Determine if the user has liked the tweet
@@ -30,80 +30,6 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification }
             localStorage.setItem('scrollPosition', window.scrollY.toString());
         }
     };
-
-
-    const handleLikes = async (tweetId: string) => {
-        // Get the logged-in username from localStorage
-        const loggedInUsername = localStorage.getItem('username');
-        // Ensure the loggedInUsername is a string and not null
-        if (!loggedInUsername) {
-            console.error('No logged-in user found.');
-            return;
-        }
-        // Find the tweet in the state
-        const tweetIndex = tweets.findIndex((tweet) => tweet._id === tweetId);
-        if (tweetIndex === -1) return; // If tweet is not found, return early
-
-        const tweet = tweets[tweetIndex];
-
-        // Check if the current user has already liked the tweet
-        const userAlreadyLiked = tweet.likes.some((like) => like.username === loggedInUsername);
-
-        // Optimistically update the UI
-        const updatedLikes = userAlreadyLiked
-            ? tweet.likes.filter((like) => like.username !== loggedInUsername)  // Unlike
-            : [...tweet.likes, { username: loggedInUsername }];  // Like
-
-        // Update the state optimistically
-        const updatedTweets = [...tweets];
-        updatedTweets[tweetIndex] = {
-            ...tweet,
-            likes: updatedLikes
-        };
-        setTweets(updatedTweets);  // Update the state with optimistic changes
-
-
-        try {
-            const res = await axiosInstance.post(`/tweets/${tweetId}/like`);
-            console.log(res.data)
-
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
-        }
-
-    };
-
-
-
 
 
     const handleSavedPost = async (tweetId: string) => {
