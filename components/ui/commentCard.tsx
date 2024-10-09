@@ -1,12 +1,67 @@
 import Image from "next/image"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
-
+import axiosInstance from "@/lib/axiosInstance";
 import {
     faCircleCheck,
-    faHeart,
+    faTrashCanArrowUp
 } from "@fortawesome/free-solid-svg-icons";
-function CommentCard({ username, text, createdAt, verification }: CommentCardProps) {
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+
+import useCommentStore from "@/store/commentStore";
+function CommentCard({ id, tweetId, username, text, createdAt, verification }: CommentCardProps) {
+    const { setTweet } = useCommentStore();
+    const { toast } = useToast();
+
+
+    const loggedInUsername = localStorage.getItem('username');
+
+    const handleDelete = async (commentId: string, tweetId: string) => {
+        try {
+            const res = await axiosInstance.delete(`/tweets/${tweetId}/comments/${commentId}`);
+            const newTweet = await axiosInstance.get(`/tweets/${tweetId}`);
+            setTweet(newTweet.data.foundTweet)
+
+            // Show error toast notification
+            toast({
+                className: "shadcn-toast-success",
+                description: res.data.message
+            });
+
+        } catch (error: any) {
+            console.error('Error occurred during signin:', error);
+
+            // Default error message
+            let errorMessage = 'An error occurred. Please try again.';
+
+            // Check if the error is an Axios error
+            if (axios.isAxiosError(error)) {
+                // Check for a response error
+                if (error.response) {
+                    // Extract message from response if available
+                    const responseMessage = error.response.data?.error;
+                    if (responseMessage) {
+                        errorMessage = responseMessage;
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
+                } else {
+                    // Handle cases where no response is available (e.g., network errors)
+                    errorMessage = 'Network error. Please try again.';
+                }
+            } else {
+                // Handle unexpected error types
+                errorMessage = 'An unexpected error occurred. Please try again later.';
+            }
+
+            // Show error toast notification
+            toast({
+                className: "shadcn-toast-failure",
+                description: errorMessage
+            });
+        }
+    }
 
     return (
         <span>
@@ -22,19 +77,25 @@ function CommentCard({ username, text, createdAt, verification }: CommentCardPro
                             quality={100}
                             priority
                         />
-                        <Link href={`/${username}`}>
-                            <p className="text-white">
-                                <span className="hover:underline">{username} </span>
-                                {verification && (<FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />)}
-                                <span className="text-gray-500"> @{username}.</span>  <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
-                            </p>
-                        </Link>
+                        <div className="flex items-center justify-between w-full mb-2">
+                            <Link href={`/${username}`} className="flex-grow">
+                                <p className="text-white">
+                                    <span className="hover:underline">{username} </span>
+                                    {verification && (
+                                        <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />
+                                    )}
+                                    <span className="text-gray-500"> @{username}.</span>
+                                    <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
+                                </p>
+                            </Link>
+                            {loggedInUsername === username && (
+                                <span className="ml-4 cursor-pointer text-gray-500 hover:text-red-600 ">
+                                    <FontAwesomeIcon onClick={() => handleDelete(id, tweetId)} icon={faTrashCanArrowUp} style={{ fontSize: 12 }} />
+                                </span>
+                            )}
+                        </div>
                     </div>
-
                     <h4 className="text-md font-normal mb-2">{text}</h4>
-                    <div>
-                        <FontAwesomeIcon icon={faHeart} style={{ fontSize: 17, color: '#ef4444' }} /> <span className="ml-1 text-sm text-gray-100 font-medium">10k Likes</span>
-                    </div>
                 </div>
 
             </li>

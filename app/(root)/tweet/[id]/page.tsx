@@ -97,8 +97,7 @@ function TweetId() {
 
 
         try {
-            const res = await axiosInstance.post(`/tweets/${tweetId}/like`);
-
+            await axiosInstance.post(`/tweets/${tweetId}/like`);
         } catch (error: any) {
             console.error('Error occurred during signin:', error);
 
@@ -172,9 +171,11 @@ function TweetId() {
             {tweet.comments.map((comment, index) => (
                 <CommentCard
                     key={index}
+                    id={comment._id}
+                    tweetId={tweet._id}
                     username={comment.author.username}
                     text={comment.comment}
-                    createdAt={tweet.createdAt}
+                    createdAt={comment.createdAt}
                     verification={comment.author.verification}
                 />
             ))}

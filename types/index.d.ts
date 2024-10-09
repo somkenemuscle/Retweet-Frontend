@@ -10,6 +10,7 @@ interface Tweet {
       {
          _id: string;
          comment: string;
+         createdAt: string;
          author: {
             _id: string;
             username: string;
@@ -35,12 +36,14 @@ interface TweetCardProps {
    createdAt: string; // include createdAt prop
    likes: {
       username: string;
-   }[];
+   }[]; 
    verification: boolean;
    handleLikes: (id: string) => void;
 }
 
 interface CommentCardProps {
+   id: string;
+   tweetId: string;
    username: string;
    text: string;
    createdAt: string; // include createdAt prop

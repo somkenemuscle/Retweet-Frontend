@@ -9,11 +9,14 @@ import {
     faComment,
     faCircleCheck,
     faHeart,
-    faBookmark
+    faBookmark,
+    faTrashCanArrowUp
 } from "@fortawesome/free-solid-svg-icons";
+import useTweetStore from "@/store/tweetStore";
 
 function TweetCard({ id, username, text, image, createdAt, likes, verification, handleLikes }: TweetCardProps) {
     const { toast } = useToast();
+    const { setTweets } = useTweetStore();
 
 
     const loggedInUsername = localStorage.getItem('username');
@@ -77,6 +80,53 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
     };
 
 
+    const handleDelete = async (tweetId: string) => {
+        try {
+            const res = await axiosInstance.delete(`/tweets/${tweetId}`);
+            const newTweet = await axiosInstance.get(`/tweets`);
+            setTweets(newTweet.data)
+
+            // Show error toast notification
+            toast({
+                className: "shadcn-toast-success",
+                description: res.data.message
+            });
+
+        } catch (error: any) {
+            console.error('Error occurred during signin:', error);
+
+            // Default error message
+            let errorMessage = 'An error occurred. Please try again.';
+
+            // Check if the error is an Axios error
+            if (axios.isAxiosError(error)) {
+                // Check for a response error
+                if (error.response) {
+                    // Extract message from response if available
+                    const responseMessage = error.response.data?.error;
+                    if (responseMessage) {
+                        errorMessage = responseMessage;
+                    } else {
+                        errorMessage = error.response.data?.message || errorMessage;
+                    }
+                } else {
+                    // Handle cases where no response is available (e.g., network errors)
+                    errorMessage = 'Network error. Please try again.';
+                }
+            } else {
+                // Handle unexpected error types
+                errorMessage = 'An unexpected error occurred. Please try again later.';
+            }
+
+            // Show error toast notification
+            toast({
+                className: "shadcn-toast-failure",
+                description: errorMessage
+            });
+        }
+    }
+
+
 
 
     return (
@@ -93,14 +143,24 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                             quality={100}
                             priority
                         />
-                        <Link href={`/${username}`} onClick={handleLinkClick}>
-                            <p className="text-white">
-                                <span className="hover:underline">{username} </span>
-                                {verification && (<FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />)}
-                                <span className="text-gray-500"> @{username}.</span>
-                                <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
-                            </p>
-                        </Link>
+                        <div className="flex items-center justify-between w-full mb-2">
+                            <Link href={`/${username}`} onClick={handleLinkClick} className="flex-grow">
+                                <p className="text-white">
+                                    <span className="hover:underline">{username} </span>
+                                    {verification && (
+                                        <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />
+                                    )}
+                                    <span className="text-gray-500"> @{username}.</span>
+                                    <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
+                                </p>
+                            </Link>
+                            {loggedInUsername === username && (
+                                <span className="ml-4 cursor-pointer text-gray-500 hover:text-red-600 ">
+                                    <FontAwesomeIcon onClick={() => handleDelete(id)} icon={faTrashCanArrowUp} style={{ fontSize: 12 }} />
+                                </span>
+                            )}
+                        </div>
+
                     </div>
                     <Link href={`/tweet/${id}`} onClick={handleLinkClick}>
                         <h4 className="text-md font-normal mb-2">{text}</h4>
@@ -129,7 +189,10 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                             <FontAwesomeIcon onClick={() => handleSavedPost(id)} icon={faBookmark} style={{ fontSize: 14 }} />
                         </div>
 
+
+
                     </div>
+
                     <span className="mt-3 text-sm text-gray-100 font-medium">{likes.length} Likes</span>
                 </div>
             </li>
