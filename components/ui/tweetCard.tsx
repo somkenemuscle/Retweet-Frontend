@@ -182,21 +182,20 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                         <div className={`flex items-center mr-3 cursor-pointer ${heartColor}`}>
                             <FontAwesomeIcon onClick={() => handleLikes(id)} icon={faHeart} style={{ fontSize: 16 }} />
                         </div>
-                        <div className="flex items-center mr-3 cursor-pointer text-white hover:text-gray-300">
-                            <FontAwesomeIcon icon={faComment} style={{ fontSize: 16 }} />
-                        </div>
+                        <Link href={`/tweet/${id}`}>
+                            <div className="flex items-center mr-3 cursor-pointer text-white hover:text-gray-300">
+                                <FontAwesomeIcon icon={faComment} style={{ fontSize: 16 }} />
+                            </div>
+                        </Link>
                         <div className="flex items-center mr-3  cursor-pointer text-green-500 hover:text-green-800">
                             <FontAwesomeIcon onClick={() => handleSavedPost(id)} icon={faBookmark} style={{ fontSize: 14 }} />
                         </div>
-
-
-
                     </div>
 
                     <span className="mt-3 text-sm text-gray-100 font-medium">{likes.length} Likes</span>
                 </div>
             </li>
-        </span>
+        </span >
     )
 }
 
