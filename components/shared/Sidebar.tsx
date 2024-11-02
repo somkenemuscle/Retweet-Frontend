@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon } from '@radix-ui/react-icons';
+import { HomeIcon, PlusIcon, PersonIcon, ExitIcon, EnterIcon, ZoomInIcon } from '@radix-ui/react-icons';
 import { Bookmark } from 'react-feather';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from "@/hooks/use-toast";
@@ -102,10 +102,12 @@ export default function Sidebar() {
                     <ul className="mt-7 space-y-1">
                         <li>
                             <Link href={`/${username}`} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
-                                <PersonIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Profile
+                                <ZoomInIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Search
                             </Link>
                         </li>
                     </ul>
+
+
 
                     <ul className="mt-7 space-y-1">
                         <li>
@@ -114,6 +116,14 @@ export default function Sidebar() {
                                 className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800"
                             >
                                 <Bookmark className="h-6 w-6 inline-flex pr-1 text-white" /> Saves
+                            </Link>
+                        </li>
+                    </ul>
+
+                    <ul className="mt-7 space-y-1">
+                        <li>
+                            <Link href={`/${username}`} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
+                                <PersonIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Profile
                             </Link>
                         </li>
                     </ul>

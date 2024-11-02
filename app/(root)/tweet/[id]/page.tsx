@@ -16,6 +16,8 @@ import useCommentStore from '@/store/commentStore';
 function TweetId() {
     const { toast } = useToast();
     const { tweet, setTweet } = useCommentStore();
+    const [loading, setLoading] = useState<boolean>(true); // Add loading state
+
 
     const params = useParams();
     const id = params.id;
@@ -55,6 +57,8 @@ function TweetId() {
                 className: "shadcn-toast-failure",
                 description: errorMessage
             });
+        } finally {
+            setLoading(false); // Stop loading after fetching or error
         }
     }
 
@@ -134,16 +138,6 @@ function TweetId() {
 
 
 
-    if (!tweet) {
-        return (
-            <div className="flex justify-center items-center mt-44">
-                <span>
-                    <Loader />
-                </span>
-            </div>
-        );
-    }
-
 
     return (
         <div className="cursor-pointer mt-9 mb-24 container mx-auto max-w-lg p-0">
@@ -153,33 +147,47 @@ function TweetId() {
                     <span className='ml-8 text-gray-300'> Go back to post</span>
                 </Link>
             </div>
-            <TweetCard
-                key={tweet._id}
-                id={tweet._id}
-                username={tweet.author?.username}
-                image={tweet.image}
-                text={tweet.text}
-                createdAt={tweet.createdAt}
-                likes={tweet.likes}
-                verification={tweet.author.verification}
-                handleLikes={handleLikes}
-            />
+            <span>
+                {loading ? (
+                    <div className="flex justify-center items-center mt-10">
+                        <Loader />
+                    </div>
+                ) : !tweet ? (
+                    <div className="flex justify-center items-center mt-10">
+                        <span>
+                            <p className='text-gray-400 mt-24'>This post does not exist</p>
+                        </span>
+                    </div>
+                ) : (
+                    <>
+                        <TweetCard
+                            key={tweet._id}
+                            id={tweet._id}
+                            username={tweet.author?.username}
+                            image={tweet.image}
+                            text={tweet.text}
+                            createdAt={tweet.createdAt}
+                            likes={tweet.likes}
+                            verification={tweet.author.verification}
+                            handleLikes={handleLikes}
+                        />
 
+                        <CreateCommentForm tweetId={`${id}`} action='Add' />
 
-            <CreateCommentForm tweetId={`${id}`} action='Add' />
-
-            {tweet.comments.map((comment, index) => (
-                <CommentCard
-                    key={index}
-                    id={comment._id}
-                    tweetId={tweet._id}
-                    username={comment.author.username}
-                    text={comment.comment}
-                    createdAt={comment.createdAt}
-                    verification={comment.author.verification}
-                />
-            ))}
-
+                        {tweet.comments.map((comment, index) => (
+                            <CommentCard
+                                key={index}
+                                id={comment._id}
+                                tweetId={tweet._id}
+                                username={comment.author.username}
+                                text={comment.comment}
+                                createdAt={comment.createdAt}
+                                verification={comment.author.verification}
+                            />
+                        ))}
+                    </>
+                )}
+            </span>
         </div>
     );
 }
