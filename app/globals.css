@@ -33,3 +33,19 @@
   font-weight: bold;
   letter-spacing: 0.5px;
 }
+
+#search-input {
+  background-color: black;
+  outline: none;
+}
+
+
+#search-input:focus {
+  outline: none;
+  border: 1px solid rgb(49, 77, 94);
+}
+
+#search-input::placeholder {
+  color: #2e3748;
+  font-size: small;
+}

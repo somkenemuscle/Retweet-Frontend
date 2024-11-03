@@ -42,6 +42,7 @@ export default function Sidebar() {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }
+
     useEffect(() => {
         GetUsername();
         CheckForDialog();
@@ -101,13 +102,11 @@ export default function Sidebar() {
 
                     <ul className="mt-7 space-y-1">
                         <li>
-                            <Link href={`/${username}`} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
+                            <Link href={`/search`} className="block rounded-2xl px-5 py-2 text-lg font-semibold text-white hover:bg-gray-800">
                                 <ZoomInIcon className="h-6 w-6 inline-flex pr-1 text-white" />  Search
                             </Link>
                         </li>
                     </ul>
-
-
 
                     <ul className="mt-7 space-y-1">
                         <li>
@@ -176,9 +175,14 @@ export default function Sidebar() {
                     <Bookmark className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </Link>
 
+
                 <span onClick={toggleDialog} className="block rounded-lg px-4 py-2 cursor-pointer">
                     <PlusIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
                 </span>
+
+                <Link href={`/search`} className="block rounded-lg px-4 py-2">
+                    <ZoomInIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
+                </Link>
 
                 <Link href={`/${username}`} className="block rounded-lg px-4 py-2">
                     <PersonIcon className="h-6 w-6 inline-flex pr-1 text-gray-500" />
