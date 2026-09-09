@@ -68,10 +68,22 @@ const config: Config = {
   			'fade-in-up': {
   				from: { opacity: '0', transform: 'translateY(8px)' },
   				to: { opacity: '1', transform: 'translateY(0)' }
+  			},
+  			'pop': {
+  				'0%': { transform: 'scale(1)' },
+  				'40%': { transform: 'scale(1.32)' },
+  				'70%': { transform: 'scale(0.92)' },
+  				'100%': { transform: 'scale(1)' }
+  			},
+  			'scale-in': {
+  				from: { opacity: '0', transform: 'scale(0.96)' },
+  				to: { opacity: '1', transform: 'scale(1)' }
   			}
   		},
   		animation: {
-  			'fade-in-up': 'fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both'
+  			'fade-in-up': 'fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both',
+  			'pop': 'pop 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+  			'scale-in': 'scale-in 0.12s ease-out both'
   		}
   	}
   },

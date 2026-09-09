@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -12,6 +12,7 @@ import {
     LogIn,
     Feather,
     X,
+    MoreHorizontal,
 } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
 import { useToast } from '@/hooks/use-toast';
@@ -38,8 +39,20 @@ export default function Sidebar() {
     const { toast } = useToast();
     const username = useUsername();
     const { isDialogOpen, setIsDialogOpen } = useDialogStore();
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!menuOpen) return;
+        const onClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+        };
+        document.addEventListener('mousedown', onClick);
+        return () => document.removeEventListener('mousedown', onClick);
+    }, [menuOpen]);
 
     const handleLogout = async () => {
+        setMenuOpen(false);
         try {
             const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
             localStorage.removeItem('username');
@@ -67,14 +80,14 @@ export default function Sidebar() {
     return (
         <>
             {/* Desktop / tablet rail */}
-            <nav className="sticky top-0 hidden h-dvh shrink-0 flex-col gap-1 px-2 py-3 sm:flex lg:w-[264px] lg:px-3">
+            <nav className="sticky top-0 hidden h-dvh w-[72px] shrink-0 flex-col items-center gap-1 px-2 py-3 sm:flex lg:w-[264px] lg:items-stretch lg:px-3">
                 <Link
                     href="/"
                     aria-label="Retweet home"
-                    className="mb-2 inline-flex items-center rounded-full p-2 transition-colors hover:bg-accent"
+                    className="mb-1 inline-flex w-fit items-center rounded-full p-2 transition-colors hover:bg-accent lg:mb-2"
                 >
                     <span className="lg:hidden">
-                        <LogoMark size={30} />
+                        <LogoMark size={28} />
                     </span>
                     <span className="hidden lg:inline-flex">
                         <Logo size={30} />
@@ -87,14 +100,21 @@ export default function Sidebar() {
                         <Link
                             key={label}
                             href={href}
+                            title={label}
+                            aria-current={active ? 'page' : undefined}
                             className={cn(
-                                'group flex items-center gap-4 rounded-full px-3 py-2.5 text-[17px] transition-colors hover:bg-accent lg:pr-6',
-                                active ? 'font-semibold text-foreground' : 'text-foreground/80'
+                                'group flex items-center gap-4 rounded-full p-3 text-[17px] transition-colors lg:w-fit lg:py-2.5 lg:pl-3 lg:pr-6',
+                                active
+                                    ? 'font-semibold text-foreground lg:bg-accent'
+                                    : 'text-foreground/75 hover:bg-accent hover:text-foreground'
                             )}
                         >
                             <Icon
-                                className={cn('h-6 w-6 shrink-0', active && 'text-primary')}
-                                strokeWidth={active ? 2.6 : 2}
+                                className={cn(
+                                    'h-[26px] w-[26px] shrink-0 transition-transform group-active:scale-90',
+                                    active && 'text-primary'
+                                )}
+                                strokeWidth={active ? 2.5 : 1.9}
                             />
                             <span className="hidden lg:inline">{label}</span>
                         </Link>
@@ -103,35 +123,50 @@ export default function Sidebar() {
 
                 <Button
                     onClick={() => setIsDialogOpen(true)}
-                    size="lg"
-                    className="mt-3 h-12 w-12 rounded-full p-0 lg:h-12 lg:w-full lg:px-6"
+                    className="mt-3 h-12 w-12 rounded-full p-0 text-base font-semibold shadow-sm lg:w-full lg:px-6"
                 >
                     <Feather className="h-5 w-5 lg:hidden" />
                     <span className="hidden lg:inline">Post</span>
                 </Button>
 
-                <div className="mt-auto">
+                <div className="relative mt-auto" ref={menuRef}>
+                    {menuOpen && username && (
+                        <div className="absolute bottom-full left-0 mb-2 w-56 animate-scale-in overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-xl">
+                            <Link
+                                href={`/${username}`}
+                                onClick={() => setMenuOpen(false)}
+                                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent"
+                            >
+                                <User className="h-4 w-4" /> View profile
+                            </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                            >
+                                <LogOut className="h-4 w-4" /> Log out @{username}
+                            </button>
+                        </div>
+                    )}
+
                     {username ? (
-                        <div className="flex items-center gap-3 rounded-full p-2 lg:pr-3">
-                            <Avatar username={username} size={38} />
-                            <div className="hidden min-w-0 flex-1 lg:block">
+                        <button
+                            onClick={() => setMenuOpen((o) => !o)}
+                            className="flex w-full items-center gap-3 rounded-full p-2 transition-colors hover:bg-accent lg:pr-2"
+                        >
+                            <Avatar username={username} size={36} />
+                            <div className="hidden min-w-0 flex-1 text-left lg:block">
                                 <p className="truncate text-sm font-semibold">{username}</p>
                                 <p className="truncate text-xs text-muted-foreground">@{username}</p>
                             </div>
-                            <button
-                                onClick={handleLogout}
-                                aria-label="Log out"
-                                className="hidden rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:inline-flex"
-                            >
-                                <LogOut className="h-4 w-4" />
-                            </button>
-                        </div>
+                            <MoreHorizontal className="hidden h-4 w-4 text-muted-foreground lg:block" />
+                        </button>
                     ) : (
                         <Link
                             href="/sign-in"
-                            className="flex items-center gap-4 rounded-full px-3 py-2.5 text-[17px] text-foreground/80 transition-colors hover:bg-accent"
+                            title="Sign in"
+                            className="flex items-center gap-4 rounded-full p-3 text-[17px] text-foreground/75 transition-colors hover:bg-accent hover:text-foreground lg:py-2.5"
                         >
-                            <LogIn className="h-6 w-6 shrink-0" />
+                            <LogIn className="h-[26px] w-[26px] shrink-0" strokeWidth={1.9} />
                             <span className="hidden lg:inline">Sign in</span>
                         </Link>
                     )}
@@ -141,14 +176,14 @@ export default function Sidebar() {
             {/* Create dialog */}
             {isDialogOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-start justify-center bg-foreground/40 p-4 pt-[8vh] backdrop-blur-sm"
+                    className="fixed inset-0 z-50 flex items-start justify-center bg-background/70 p-4 pt-[7vh] backdrop-blur-sm"
                     onClick={() => setIsDialogOpen(false)}
                 >
                     <div
-                        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-xl"
+                        className="relative w-full max-w-xl animate-scale-in overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex items-center gap-4 px-4 py-3">
+                        <div className="flex items-center px-3 py-2.5">
                             <button
                                 onClick={() => setIsDialogOpen(false)}
                                 aria-label="Close"
@@ -163,24 +198,25 @@ export default function Sidebar() {
             )}
 
             {/* Mobile bottom bar */}
-            <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-card/95 backdrop-blur sm:hidden">
-                {nav.map(({ href, label, icon: Icon }) => (
-                    <Link key={label} href={href} aria-label={label} className="p-3.5">
-                        <Icon
-                            className={cn(
-                                'h-6 w-6',
-                                isActive(href) ? 'text-primary' : 'text-muted-foreground'
+            <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden">
+                {nav.map(({ href, label, icon: Icon }) => {
+                    const active = isActive(href);
+                    return (
+                        <Link key={label} href={href} aria-label={label} className="relative p-3.5">
+                            <Icon
+                                className={cn('h-6 w-6', active ? 'text-primary' : 'text-muted-foreground')}
+                                strokeWidth={active ? 2.5 : 1.9}
+                            />
+                            {active && (
+                                <span className="absolute inset-x-0 -bottom-0 mx-auto h-[3px] w-6 rounded-full bg-primary" />
                             )}
-                            strokeWidth={isActive(href) ? 2.6 : 2}
-                        />
-                    </Link>
-                ))}
-                <button
-                    onClick={() => setIsDialogOpen(true)}
-                    aria-label="Post"
-                    className="p-3.5"
-                >
-                    <Feather className="h-6 w-6 text-muted-foreground" />
+                        </Link>
+                    );
+                })}
+                <button onClick={() => setIsDialogOpen(true)} aria-label="Post" className="p-3.5">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                        <Feather className="h-[18px] w-[18px]" />
+                    </span>
                 </button>
             </div>
         </>

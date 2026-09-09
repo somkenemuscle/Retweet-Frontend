@@ -37,10 +37,17 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
     const { setTweets } = useTweetStore()
     const router = useRouter()
     const [menuOpen, setMenuOpen] = useState(false)
+    const [justLiked, setJustLiked] = useState(false)
+    const [saved, setSaved] = useState(false)
 
     const loggedInUsername = typeof window !== 'undefined' ? localStorage.getItem('username') : null
     const userAlreadyLiked = likes.some((like) => like.username === loggedInUsername)
     const isOwner = loggedInUsername === username
+
+    const fullDate = new Date(createdAt).toLocaleString(undefined, {
+        dateStyle: 'long',
+        timeStyle: 'short',
+    })
 
     const rememberScroll = () => {
         if (typeof window !== 'undefined') {
@@ -54,12 +61,20 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
     }
 
     const handleSavedPost = async () => {
+        setSaved((s) => !s)
         try {
             const res = await axiosInstance.post(`/tweets/${id}/save`)
             toast({ className: "shadcn-toast-success", description: res.data.message })
         } catch (error: any) {
+            setSaved((s) => !s)
             toast({ className: "shadcn-toast-failure", description: extractErrorMessage(error) })
         }
+    }
+
+    const onLike = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (!userAlreadyLiked) setJustLiked(true)
+        handleLikes(id)
     }
 
     const handleDelete = async () => {
@@ -77,7 +92,11 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
     return (
         <article
             onClick={goToTweet}
-            className="flex cursor-pointer gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted/40"
+            onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); goToTweet() } }}
+            tabIndex={0}
+            role="link"
+            aria-label={`Post by ${username}`}
+            className="flex cursor-pointer gap-3 border-b border-border px-4 py-3.5 outline-none transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50"
         >
             <Link
                 href={`/${username}`}
@@ -101,7 +120,11 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                     )}
                     <span className="truncate text-muted-foreground">@{username}</span>
                     <span className="text-muted-foreground">·</span>
-                    <time className="shrink-0 text-muted-foreground hover:underline">
+                    <time
+                        title={fullDate}
+                        dateTime={new Date(createdAt).toISOString()}
+                        className="shrink-0 text-muted-foreground hover:underline"
+                    >
                         {formatRelativeTime(createdAt)}
                     </time>
 
@@ -141,21 +164,22 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                 )}
 
                 {image && (
-                    <div className="mt-3 overflow-hidden rounded-2xl border border-border">
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-border bg-muted">
                         <Image
                             alt="Attached image"
                             src={image}
                             width={600}
                             height={400}
-                            className="h-auto max-h-[520px] w-full object-cover"
+                            className="h-auto max-h-[540px] w-full object-cover"
                         />
                     </div>
                 )}
 
-                <div className="mt-2.5 flex items-center gap-1 text-muted-foreground">
+                <div className="-ml-2 mt-2 flex items-center gap-1 text-muted-foreground">
                     <button
                         onClick={(e) => { e.stopPropagation(); goToTweet() }}
-                        className="group flex items-center gap-1.5 rounded-full py-1 pr-2 text-[13px] transition-colors hover:text-primary"
+                        aria-label="Reply"
+                        className="group flex items-center gap-1 rounded-full px-1.5 py-1 text-[13px] tabular-nums transition-colors hover:text-primary"
                     >
                         <span className="rounded-full p-1.5 transition-colors group-hover:bg-primary/10">
                             <MessageCircle className="h-[18px] w-[18px]" />
@@ -163,24 +187,38 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                     </button>
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); handleLikes(id) }}
+                        onClick={onLike}
+                        aria-pressed={userAlreadyLiked}
+                        aria-label="Like"
                         className={cn(
-                            "group flex items-center gap-1.5 rounded-full py-1 pr-2 text-[13px] transition-colors hover:text-rose-500",
+                            "group flex items-center gap-1 rounded-full px-1.5 py-1 text-[13px] tabular-nums transition-colors hover:text-rose-500",
                             userAlreadyLiked && "text-rose-500"
                         )}
                     >
                         <span className="rounded-full p-1.5 transition-colors group-hover:bg-rose-500/10">
-                            <Heart className={cn("h-[18px] w-[18px]", userAlreadyLiked && "fill-current")} />
+                            <Heart
+                                onAnimationEnd={() => setJustLiked(false)}
+                                className={cn(
+                                    "h-[18px] w-[18px] transition-transform group-active:scale-90",
+                                    userAlreadyLiked && "fill-current",
+                                    justLiked && "animate-pop"
+                                )}
+                            />
                         </span>
                         {likes.length > 0 && <span>{likes.length}</span>}
                     </button>
 
                     <button
                         onClick={(e) => { e.stopPropagation(); handleSavedPost() }}
-                        className="group ml-auto flex items-center rounded-full py-1 text-[13px] transition-colors hover:text-primary"
+                        aria-pressed={saved}
+                        aria-label="Save"
+                        className={cn(
+                            "group ml-auto flex items-center rounded-full px-1.5 py-1 text-[13px] transition-colors hover:text-primary",
+                            saved && "text-primary"
+                        )}
                     >
                         <span className="rounded-full p-1.5 transition-colors group-hover:bg-primary/10">
-                            <Bookmark className="h-[18px] w-[18px]" />
+                            <Bookmark className={cn("h-[18px] w-[18px] transition-transform group-active:scale-90", saved && "fill-current")} />
                         </span>
                     </button>
                 </div>

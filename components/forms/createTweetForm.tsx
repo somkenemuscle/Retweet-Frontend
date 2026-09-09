@@ -3,7 +3,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { AutosizeTextarea } from "@/components/ui/AutosizeTextarea";
+import CharCountRing from "@/components/ui/CharCountRing";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { isBase64Image } from "@/lib/utils";
@@ -17,7 +18,7 @@ import { ImageIcon, Smile, X } from "lucide-react";
 import Spinner from "../ui/Spinner";
 import Avatar from "../ui/Avatar";
 import useTweetStore from "@/store/tweetStore";
-import EmojiPicker from 'emoji-picker-react'; // Import the emoji picker
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import { useDialogStore } from '@/store/dialogStore';
 
 
@@ -158,8 +159,16 @@ function CreateInteractionForm({ action }: { action: string }) {
 
 
 
-    const textValue = form.watch("text");
-    const canPost = !loading && !!(textValue?.trim() || imagePreview);
+    const LIMIT = 280;
+    const textValue = form.watch("text") ?? "";
+    const overLimit = textValue.length > LIMIT;
+    const canPost = !loading && !overLimit && !!(textValue.trim() || imagePreview);
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canPost) {
+            form.handleSubmit(onSubmit)();
+        }
+    };
 
     return (
         <div className="border-b border-border px-4 py-3">
@@ -172,27 +181,28 @@ function CreateInteractionForm({ action }: { action: string }) {
                             control={form.control}
                             name="text"
                             render={({ field }) => (
-                                <Textarea
-                                    rows={2}
+                                <AutosizeTextarea
                                     {...field}
+                                    onKeyDown={handleKeyDown}
                                     placeholder="What's happening?"
-                                    className="min-h-[52px] resize-none border-none bg-transparent px-0 py-2 text-lg shadow-none focus-visible:shadow-none"
+                                    minHeight={48}
+                                    className="py-2.5 text-lg leading-relaxed text-foreground"
                                 />
                             )}
                         />
 
                         {imagePreview && (
-                            <div className="relative mt-2 w-fit overflow-hidden rounded-2xl border border-border">
+                            <div className="group relative mt-2 w-fit overflow-hidden rounded-2xl border border-border">
                                 <img
                                     src={imagePreview}
                                     alt="Preview"
-                                    className="max-h-72 w-auto object-cover"
+                                    className="max-h-80 w-auto object-cover"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleRemoveImage}
                                     aria-label="Remove image"
-                                    className="absolute right-2 top-2 rounded-full bg-foreground/70 p-1.5 text-background transition-colors hover:bg-foreground"
+                                    className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur transition-colors hover:bg-background"
                                 >
                                     <X className="h-4 w-4" />
                                 </button>
@@ -200,7 +210,7 @@ function CreateInteractionForm({ action }: { action: string }) {
                         )}
 
                         <div className="mt-2 flex items-center justify-between border-t border-border pt-2.5">
-                            <div className="flex items-center gap-1 text-primary">
+                            <div className="flex items-center gap-0.5 text-primary">
                                 <FormField
                                     control={form.control}
                                     name="image"
@@ -231,20 +241,34 @@ function CreateInteractionForm({ action }: { action: string }) {
                                         <Smile className="h-[19px] w-[19px]" />
                                     </button>
                                     {showEmojiPicker && (
-                                        <div className="absolute left-0 top-full z-20 mt-1">
-                                            <EmojiPicker onEmojiClick={handleEmojiClick} />
+                                        <div className="absolute left-0 top-full z-30 mt-1 animate-scale-in overflow-hidden rounded-xl border border-border shadow-xl">
+                                            <EmojiPicker
+                                                onEmojiClick={handleEmojiClick}
+                                                theme={EmojiTheme.DARK}
+                                                width={320}
+                                                height={380}
+                                                lazyLoadEmojis
+                                            />
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <Button
-                                type="submit"
-                                disabled={!canPost}
-                                className="rounded-full px-5 font-semibold"
-                            >
-                                {loading ? <Spinner size={16} /> : "Post"}
-                            </Button>
+                            <div className="flex items-center gap-3">
+                                {textValue.length > 0 && (
+                                    <>
+                                        <CharCountRing count={textValue.length} limit={LIMIT} />
+                                        <span className="h-6 w-px bg-border" />
+                                    </>
+                                )}
+                                <Button
+                                    type="submit"
+                                    disabled={!canPost}
+                                    className="rounded-full px-5 font-semibold"
+                                >
+                                    {loading ? <Spinner size={16} /> : "Post"}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </form>
