@@ -36,7 +36,7 @@ interface TweetCardProps {
    createdAt: string; // include createdAt prop
    likes: {
       username: string;
-   }[]; 
+   }[];
    verification: boolean;
    handleLikes: (id: string) => void;
 }
