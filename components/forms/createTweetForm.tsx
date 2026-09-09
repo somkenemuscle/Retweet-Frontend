@@ -13,12 +13,11 @@ import { useUploadThing } from "@/lib/uploadthing";
 import axiosInstance from "@/lib/axiosInstance";
 import { useToast } from "@/hooks/use-toast";
 import { tweetFormSchema } from "@/lib/tweetSchema";
-import { AiOutlineFileImage } from "react-icons/ai";
-import { MdCancel } from "react-icons/md";
-import Loader from "../ui/Loader";
+import { ImageIcon, Smile, X } from "lucide-react";
+import Spinner from "../ui/Spinner";
+import Avatar from "../ui/Avatar";
 import useTweetStore from "@/store/tweetStore";
 import EmojiPicker from 'emoji-picker-react'; // Import the emoji picker
-import { FaSmile } from "react-icons/fa"; // Import the smile icon
 import { useDialogStore } from '@/store/dialogStore';
 
 
@@ -30,7 +29,12 @@ function CreateInteractionForm({ action }: { action: string }) {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker state
+    const [username, setUsername] = useState<string | null>(null);
     const { setIsDialogOpen } = useDialogStore();
+
+    useEffect(() => {
+        setUsername(localStorage.getItem("username"));
+    }, []);
 
 
     const form = useForm<z.infer<typeof tweetFormSchema>>({
@@ -154,96 +158,94 @@ function CreateInteractionForm({ action }: { action: string }) {
 
 
 
+    const textValue = form.watch("text");
+    const canPost = !loading && !!(textValue?.trim() || imagePreview);
+
     return (
-        <div className="p-6 shadow-md max-w-full mx-auto my-8 rounded-none sm:rounded-xl border border-gray-900">
+        <div className="border-b border-border px-4 py-3">
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <div className="flex">
-                        <div className="mr-4">
-                            <img
-                                src="/assets/images/prof.png"
-                                alt="profile-pic"
-                                className="w-10 h-9 rounded-full"
-                            />
-                        </div>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3">
+                    <Avatar username={username ?? ""} size={40} className="mt-1" />
 
-                        <div className="w-full">
-                            <FormField
-                                control={form.control}
-                                name="text"
-                                render={({ field }) => (
-                                    <Textarea
-                                        rows={3}
-                                        {...field}
-                                        placeholder="What's happening?"
-                                        className="w-full px-4 py-3 border-none bg-gray-900 text-white rounded-xl focus:outline-none"
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <FormField
-                                control={form.control}
-                                name="image"
-                                render={({ field }) => (
-                                    <label className="cursor-pointer flex items-center space-x-2">
-                                        <AiOutlineFileImage className="w-5 h-5 text-blue-500" />
-                                        <Input
-                                            id="image-input"
-                                            accept="image/*"
-                                            onChange={(e) => handleImage(e, field.onChange)}
-                                            type="file"
-                                            className="hidden"
-                                        />
-                                    </label>
-                                )}
-                            />
-
-                            {imagePreview && (
-                                <div className="relative w-16 h-16 flex-shrink-0">
-                                    <img
-                                        src={imagePreview}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover rounded-xl"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleRemoveImage}
-                                        className="absolute top-0 right-0 p-1 bg-white rounded-full shadow-md"
-                                    >
-                                        <MdCancel className="w-4 h-4 text-red-500" />
-                                    </button>
-                                </div>
+                    <div className="min-w-0 flex-1">
+                        <FormField
+                            control={form.control}
+                            name="text"
+                            render={({ field }) => (
+                                <Textarea
+                                    rows={2}
+                                    {...field}
+                                    placeholder="What's happening?"
+                                    className="min-h-[52px] resize-none border-none bg-transparent px-0 py-2 text-lg shadow-none focus-visible:shadow-none"
+                                />
                             )}
+                        />
 
-                            {/* Emoji Picker Button */}
-                            <div className="relative" ref={emojiPickerRef}>
+                        {imagePreview && (
+                            <div className="relative mt-2 w-fit overflow-hidden rounded-2xl border border-border">
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="max-h-72 w-auto object-cover"
+                                />
                                 <button
                                     type="button"
-                                    className="text-yellow-400"
-                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    onClick={handleRemoveImage}
+                                    aria-label="Remove image"
+                                    className="absolute right-2 top-2 rounded-full bg-foreground/70 p-1.5 text-background transition-colors hover:bg-foreground"
                                 >
-                                    <FaSmile className="w-5 h-5" />
+                                    <X className="h-4 w-4" />
                                 </button>
-                                {showEmojiPicker && (
-                                    <div className="absolute z-10">
-                                        <EmojiPicker
-                                            onEmojiClick={handleEmojiClick}
-                                        />
-                                    </div>
-                                )}
                             </div>
-                        </div>
+                        )}
 
-                        <Button type="submit" className="ml-auto px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2">
-                            Post {loading && <span className="ml-3"> <Loader /> </span>}
-                        </Button>
+                        <div className="mt-2 flex items-center justify-between border-t border-border pt-2.5">
+                            <div className="flex items-center gap-1 text-primary">
+                                <FormField
+                                    control={form.control}
+                                    name="image"
+                                    render={({ field }) => (
+                                        <label
+                                            className="cursor-pointer rounded-full p-2 transition-colors hover:bg-primary/10"
+                                            aria-label="Add image"
+                                        >
+                                            <ImageIcon className="h-[19px] w-[19px]" />
+                                            <Input
+                                                id="image-input"
+                                                accept="image/*"
+                                                onChange={(e) => handleImage(e, field.onChange)}
+                                                type="file"
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    )}
+                                />
+
+                                <div className="relative" ref={emojiPickerRef}>
+                                    <button
+                                        type="button"
+                                        aria-label="Add emoji"
+                                        className="rounded-full p-2 transition-colors hover:bg-primary/10"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    >
+                                        <Smile className="h-[19px] w-[19px]" />
+                                    </button>
+                                    {showEmojiPicker && (
+                                        <div className="absolute left-0 top-full z-20 mt-1">
+                                            <EmojiPicker onEmojiClick={handleEmojiClick} />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={!canPost}
+                                className="rounded-full px-5 font-semibold"
+                            >
+                                {loading ? <Spinner size={16} /> : "Post"}
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </Form>

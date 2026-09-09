@@ -1,201 +1,191 @@
 'use client'
+import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axiosInstance from "@/lib/axiosInstance";
-import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import { useRouter } from "next/navigation"
 import {
-    faComment,
-    faCircleCheck,
-    faHeart,
-    faBookmark,
-    faTrashCanArrowUp
-} from "@fortawesome/free-solid-svg-icons";
-import useTweetStore from "@/store/tweetStore";
+    MessageCircle,
+    Heart,
+    Bookmark,
+    MoreHorizontal,
+    Trash2,
+    BadgeCheck,
+} from "lucide-react"
+import axios from "axios"
+import axiosInstance from "@/lib/axiosInstance"
+import { useToast } from "@/hooks/use-toast"
+import useTweetStore from "@/store/tweetStore"
+import Avatar from "@/components/ui/Avatar"
+import { cn, formatRelativeTime } from "@/lib/utils"
+
+function extractErrorMessage(error: any): string {
+    if (axios.isAxiosError(error)) {
+        if (error.response) {
+            return (
+                error.response.data?.error ||
+                error.response.data?.message ||
+                'An error occurred. Please try again.'
+            )
+        }
+        return 'Network error. Please try again.'
+    }
+    return 'An unexpected error occurred. Please try again later.'
+}
 
 function TweetCard({ id, username, text, image, createdAt, likes, verification, handleLikes }: TweetCardProps) {
-    const { toast } = useToast();
-    const { setTweets } = useTweetStore();
+    const { toast } = useToast()
+    const { setTweets } = useTweetStore()
+    const router = useRouter()
+    const [menuOpen, setMenuOpen] = useState(false)
 
+    const loggedInUsername = typeof window !== 'undefined' ? localStorage.getItem('username') : null
+    const userAlreadyLiked = likes.some((like) => like.username === loggedInUsername)
+    const isOwner = loggedInUsername === username
 
-    const loggedInUsername = localStorage.getItem('username');
-
-    // Determine if the user has liked the tweet
-    const userAlreadyLiked = likes.some((like) => like.username === loggedInUsername);
-
-    // Set the heart icon color based on whether the user has liked the tweet
-    const heartColor = userAlreadyLiked ? 'text-red-700' : 'text-white';
-
-
-    const handleLinkClick = () => {
+    const rememberScroll = () => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('scrollPosition', window.scrollY.toString());
-        }
-    };
-
-
-    const handleSavedPost = async (tweetId: string) => {
-        try {
-            const res = await axiosInstance.post(`/tweets/${tweetId}/save`);
-            // Show error toast notification
-            toast({
-                className: "shadcn-toast-success",
-                description: res.data.message
-            });
-
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
-        }
-
-    };
-
-
-    const handleDelete = async (tweetId: string) => {
-        try {
-            const res = await axiosInstance.delete(`/tweets/${tweetId}`);
-            const newTweet = await axiosInstance.get(`/tweets`);
-            setTweets(newTweet.data)
-
-            // Show error toast notification
-            toast({
-                className: "shadcn-toast-success",
-                description: res.data.message
-            });
-
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            localStorage.setItem('scrollPosition', window.scrollY.toString())
         }
     }
 
+    const goToTweet = () => {
+        rememberScroll()
+        router.push(`/tweet/${id}`)
+    }
 
+    const handleSavedPost = async () => {
+        try {
+            const res = await axiosInstance.post(`/tweets/${id}/save`)
+            toast({ className: "shadcn-toast-success", description: res.data.message })
+        } catch (error: any) {
+            toast({ className: "shadcn-toast-failure", description: extractErrorMessage(error) })
+        }
+    }
 
+    const handleDelete = async () => {
+        setMenuOpen(false)
+        try {
+            const res = await axiosInstance.delete(`/tweets/${id}`)
+            const refreshed = await axiosInstance.get(`/tweets`)
+            setTweets(refreshed.data)
+            toast({ className: "shadcn-toast-success", description: res.data.message })
+        } catch (error: any) {
+            toast({ className: "shadcn-toast-failure", description: extractErrorMessage(error) })
+        }
+    }
 
     return (
-        <span>
-            <li className="border-gray-900 rounded-none hover:bg-neutral-950 sm:rounded-xl flex p-4 border-[0.5px] cursor-pointer">
-                <div className="flex flex-col flex-grow">
-                    <div className="flex items-center mb-2">
-                        <Image
-                            src='/assets/images/prof.png'
-                            alt="profilepic"
-                            width={100}
-                            height={100}
-                            className="w-8 h-8 rounded-full mr-2"
-                            quality={100}
-                            priority
-                        />
-                        <div className="flex items-center justify-between w-full mb-2">
-                            <Link href={`/${username}`} onClick={handleLinkClick} className="flex-grow">
-                                <p className="text-white">
-                                    <span className="hover:underline">{username} </span>
-                                    {verification && (
-                                        <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />
-                                    )}
-                                    <span className="text-gray-500"> @{username}.</span>
-                                    <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
-                                </p>
-                            </Link>
-                            {loggedInUsername === username && (
-                                <span className="ml-4 cursor-pointer text-gray-500 hover:text-red-600 ">
-                                    <FontAwesomeIcon onClick={() => handleDelete(id)} icon={faTrashCanArrowUp} style={{ fontSize: 12 }} />
-                                </span>
+        <article
+            onClick={goToTweet}
+            className="flex cursor-pointer gap-3 border-b border-border px-4 py-3.5 transition-colors hover:bg-muted/40"
+        >
+            <Link
+                href={`/${username}`}
+                onClick={(e) => { e.stopPropagation(); rememberScroll() }}
+                className="shrink-0"
+            >
+                <Avatar username={username} size={40} />
+            </Link>
+
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1 text-[15px]">
+                    <Link
+                        href={`/${username}`}
+                        onClick={(e) => { e.stopPropagation(); rememberScroll() }}
+                        className="truncate font-semibold text-foreground hover:underline"
+                    >
+                        {username}
+                    </Link>
+                    {verification && (
+                        <BadgeCheck className="h-[17px] w-[17px] shrink-0 text-primary" aria-label="Verified" />
+                    )}
+                    <span className="truncate text-muted-foreground">@{username}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <time className="shrink-0 text-muted-foreground hover:underline">
+                        {formatRelativeTime(createdAt)}
+                    </time>
+
+                    {isOwner && (
+                        <div className="relative ml-auto">
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o) }}
+                                aria-label="More"
+                                className="-mr-2 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                            >
+                                <MoreHorizontal className="h-[18px] w-[18px]" />
+                            </button>
+                            {menuOpen && (
+                                <>
+                                    <div
+                                        className="fixed inset-0 z-10"
+                                        onClick={(e) => { e.stopPropagation(); setMenuOpen(false) }}
+                                    />
+                                    <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg">
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete() }}
+                                            className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                                        >
+                                            <Trash2 className="h-4 w-4" /> Delete
+                                        </button>
+                                    </div>
+                                </>
                             )}
                         </div>
-
-                    </div>
-                    <Link href={`/tweet/${id}`} onClick={handleLinkClick}>
-                        <h4 className="text-md font-normal mb-2">{text}</h4>
-                        {image ? (
-                            <Image
-                                alt="tweet-image"
-                                src={image}
-                                width={200}
-                                height={200}
-                                className="w-full rounded-xl mt-4 mb-2"
-                                quality={100}
-                                layout="responsive"
-                                priority
-                            />
-                        ) : null}
-                    </Link>
-                    {/* Engagement Section */}
-                    <div className="flex  mt-4 text-gray-500">
-                        <div className={`flex items-center mr-3 cursor-pointer ${heartColor}`}>
-                            <FontAwesomeIcon onClick={() => handleLikes(id)} icon={faHeart} style={{ fontSize: 16 }} />
-                        </div>
-                        <Link href={`/tweet/${id}`}>
-                            <div className="flex items-center mr-3 cursor-pointer text-white hover:text-gray-300">
-                                <FontAwesomeIcon icon={faComment} style={{ fontSize: 16 }} />
-                            </div>
-                        </Link>
-                        <div className="flex items-center mr-3  cursor-pointer text-green-500 hover:text-green-800">
-                            <FontAwesomeIcon onClick={() => handleSavedPost(id)} icon={faBookmark} style={{ fontSize: 14 }} />
-                        </div>
-                    </div>
-
-                    <span className="mt-3 text-sm text-gray-100 font-medium">{likes.length} Likes</span>
+                    )}
                 </div>
-            </li>
-        </span >
+
+                {text && (
+                    <p className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
+                        {text}
+                    </p>
+                )}
+
+                {image && (
+                    <div className="mt-3 overflow-hidden rounded-2xl border border-border">
+                        <Image
+                            alt="Attached image"
+                            src={image}
+                            width={600}
+                            height={400}
+                            className="h-auto max-h-[520px] w-full object-cover"
+                        />
+                    </div>
+                )}
+
+                <div className="mt-2.5 flex items-center gap-1 text-muted-foreground">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); goToTweet() }}
+                        className="group flex items-center gap-1.5 rounded-full py-1 pr-2 text-[13px] transition-colors hover:text-primary"
+                    >
+                        <span className="rounded-full p-1.5 transition-colors group-hover:bg-primary/10">
+                            <MessageCircle className="h-[18px] w-[18px]" />
+                        </span>
+                    </button>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleLikes(id) }}
+                        className={cn(
+                            "group flex items-center gap-1.5 rounded-full py-1 pr-2 text-[13px] transition-colors hover:text-rose-500",
+                            userAlreadyLiked && "text-rose-500"
+                        )}
+                    >
+                        <span className="rounded-full p-1.5 transition-colors group-hover:bg-rose-500/10">
+                            <Heart className={cn("h-[18px] w-[18px]", userAlreadyLiked && "fill-current")} />
+                        </span>
+                        {likes.length > 0 && <span>{likes.length}</span>}
+                    </button>
+
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleSavedPost() }}
+                        className="group ml-auto flex items-center rounded-full py-1 text-[13px] transition-colors hover:text-primary"
+                    >
+                        <span className="rounded-full p-1.5 transition-colors group-hover:bg-primary/10">
+                            <Bookmark className="h-[18px] w-[18px]" />
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </article>
     )
 }
 
