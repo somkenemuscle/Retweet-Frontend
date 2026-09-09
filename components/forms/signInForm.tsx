@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import axios from "axios"
 import { useRouter } from "next/navigation"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "@/lib/toast";
 import Link from "next/link"
 import { useState } from "react"
 import axiosInstance from "@/lib/axiosInstance"
@@ -21,7 +21,6 @@ import { SignInFormSchema } from "@/lib/authSchema"
 import { AuthHeading, PasswordInput, SubmitButton } from "./authUi"
 
 export default function SignInForm() {
-    const { toast } = useToast();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
@@ -55,10 +54,7 @@ export default function SignInForm() {
             router.push('/');
 
             // Show success toast
-            toast({
-                className: "shadcn-toast-success",
-                description: message
-            });
+            toast.success(message);
 
         } catch (error: any) {
             console.error('Error occurred during signin:', error);
@@ -87,10 +83,7 @@ export default function SignInForm() {
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         } finally {
             // Hide the loader after request is complete (either success or error)
             setLoading(false);

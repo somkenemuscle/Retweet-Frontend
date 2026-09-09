@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "@/lib/axiosInstance";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import Loader from "../ui/Loader";
 import useCommentStore from "@/store/commentStore";
 import axios from "axios";
@@ -19,7 +19,6 @@ const commentFormSchema = z.object({
 });
 
 function CreateCommentForm({ action, tweetId }: { action: string, tweetId: string }) {
-    const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const { setTweet } = useCommentStore();
     const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker state
@@ -53,10 +52,7 @@ function CreateCommentForm({ action, tweetId }: { action: string, tweetId: strin
                 errorMessage = 'An unexpected error occurred. Please try again later.';
             }
 
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         }
     }
 
@@ -74,15 +70,9 @@ function CreateCommentForm({ action, tweetId }: { action: string, tweetId: strin
                     });
                     getTweet();
                     const { message } = res.data;
-                    toast({
-                        className: "shadcn-toast-success",
-                        description: message,
-                    });
+                    toast.success(message);
                 } else {
-                    toast({
-                        className: "shadcn-toast-failure",
-                        description: "You have to be logged in to comment",
-                    });
+                    toast.error("You have to be logged in to comment");
                 }
             } catch (error: any) {
                 console.error("Error occurred while posting a comment:", error);

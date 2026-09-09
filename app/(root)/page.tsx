@@ -6,7 +6,7 @@ import useTweetStore from "@/store/tweetStore";
 import TweetCard from "@/components/ui/tweetCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import axios from "axios";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 
 
 function FeedSkeleton() {
@@ -29,7 +29,6 @@ function FeedSkeleton() {
 
 export default function Home() {
   const { tweets, setTweets } = useTweetStore();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
 
 
@@ -123,10 +122,7 @@ export default function Home() {
       }
 
       // Show error toast notification
-      toast({
-        className: "shadcn-toast-failure",
-        description: errorMessage
-      });
+      toast.error(errorMessage);
     }
   };
 

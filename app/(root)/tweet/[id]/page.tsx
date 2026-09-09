@@ -8,13 +8,12 @@ import Loader from '@/components/ui/Loader';
 import Link from 'next/link';
 import CommentCard from '@/components/ui/commentCard';
 import axios from 'axios';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import CreateCommentForm from '@/components/forms/createComment';
 import useCommentStore from '@/store/commentStore';
 
 
 function TweetId() {
-    const { toast } = useToast();
     const { tweet, setTweet } = useCommentStore();
     const [loading, setLoading] = useState<boolean>(true); // Add loading state
 
@@ -53,10 +52,7 @@ function TweetId() {
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         } finally {
             setLoading(false); // Stop loading after fetching or error
         }
@@ -129,10 +125,7 @@ function TweetId() {
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         }
     };
 

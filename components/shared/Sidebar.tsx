@@ -15,7 +15,7 @@ import {
     MoreHorizontal,
 } from 'lucide-react';
 import axiosInstance from '@/lib/axiosInstance';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "@/lib/toast";
 import { useDialogStore } from '@/store/dialogStore';
 import CreateInteractionForm from '../forms/createTweetForm';
 import Logo, { LogoMark } from './Logo';
@@ -36,7 +36,6 @@ function useUsername() {
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { toast } = useToast();
     const username = useUsername();
     const { isDialogOpen, setIsDialogOpen } = useDialogStore();
     const [menuOpen, setMenuOpen] = useState(false);
@@ -57,13 +56,10 @@ export default function Sidebar() {
             const res = await axiosInstance.post('/auth/logout', {}, { withCredentials: true });
             localStorage.removeItem('username');
             window.dispatchEvent(new Event('storage'));
-            toast({ className: 'shadcn-toast-success', description: res.data.message });
+            toast.success(res.data.message);
         } catch (error) {
             console.error('Error occurred during logout:', error);
-            toast({
-                className: 'shadcn-toast-failure',
-                description: 'An error occurred during logout. Please try again.',
-            });
+            toast.error('An error occurred during logout. Please try again.');
         }
     };
 

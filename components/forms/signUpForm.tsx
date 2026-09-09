@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useState, useRef } from "react";
 import axiosInstance from "@/lib/axiosInstance";
@@ -22,7 +22,6 @@ import { SignUpFormSchema } from "@/lib/authSchema";
 import { AuthHeading, PasswordInput, SubmitButton } from "./authUi";
 
 export default function SignUpForm() {
-    const { toast } = useToast();
     const router = useRouter();
     const recaptchaRef = useRef<ReCAPTCHA>(null);
     const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
@@ -51,10 +50,7 @@ export default function SignUpForm() {
     async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
         try {
             if (!recaptchaToken) {
-                toast({
-                    className: "shadcn-toast-failure",
-                    description: "Please complete the reCAPTCHA",
-                });
+                toast.error("Please complete the reCAPTCHA");
                 return;
             }
 
@@ -86,10 +82,7 @@ export default function SignUpForm() {
             router.push('/');
 
             // Show success toast notification
-            toast({
-                className: "shadcn-toast-success",
-                description: message
-            });
+            toast.success(message);
 
         } catch (error: any) {
             console.error('Error occurred during signup:', error);
@@ -118,10 +111,7 @@ export default function SignUpForm() {
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
 
             // Clear the reCAPTCHA token
             setRecaptchaToken(null);

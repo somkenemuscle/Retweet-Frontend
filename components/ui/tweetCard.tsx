@@ -13,7 +13,7 @@ import {
 } from "lucide-react"
 import axios from "axios"
 import axiosInstance from "@/lib/axiosInstance"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "@/lib/toast";
 import useTweetStore from "@/store/tweetStore"
 import Avatar from "@/components/ui/Avatar"
 import { cn, formatRelativeTime } from "@/lib/utils"
@@ -33,7 +33,6 @@ function extractErrorMessage(error: any): string {
 }
 
 function TweetCard({ id, username, text, image, createdAt, likes, verification, handleLikes }: TweetCardProps) {
-    const { toast } = useToast()
     const { setTweets } = useTweetStore()
     const router = useRouter()
     const [menuOpen, setMenuOpen] = useState(false)
@@ -64,10 +63,10 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
         setSaved((s) => !s)
         try {
             const res = await axiosInstance.post(`/tweets/${id}/save`)
-            toast({ className: "shadcn-toast-success", description: res.data.message })
+            toast.success(res.data.message)
         } catch (error: any) {
             setSaved((s) => !s)
-            toast({ className: "shadcn-toast-failure", description: extractErrorMessage(error) })
+            toast.error(extractErrorMessage(error))
         }
     }
 
@@ -83,9 +82,9 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
             const res = await axiosInstance.delete(`/tweets/${id}`)
             const refreshed = await axiosInstance.get(`/tweets`)
             setTweets(refreshed.data)
-            toast({ className: "shadcn-toast-success", description: res.data.message })
+            toast.success(res.data.message)
         } catch (error: any) {
-            toast({ className: "shadcn-toast-failure", description: extractErrorMessage(error) })
+            toast.error(extractErrorMessage(error))
         }
     }
 

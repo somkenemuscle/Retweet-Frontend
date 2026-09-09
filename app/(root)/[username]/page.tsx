@@ -8,7 +8,7 @@ import Loader from '@/components/ui/Loader';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from 'next/link';
 import axios from 'axios';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import {
     faCircleCheck
 } from "@fortawesome/free-solid-svg-icons";
@@ -16,7 +16,6 @@ import Image from 'next/image';
 
 
 function TweetId() {
-    const { toast } = useToast();
     const [UsersTweets, setUsersTweets] = useState<Tweet[]>([]);
     const [loading, setLoading] = useState<boolean>(true); // Add loading state
     const params = useParams();
@@ -43,10 +42,7 @@ function TweetId() {
                 errorMessage = 'An unexpected error occurred. Please try again later.';
             }
 
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         } finally {
             setLoading(false); // Stop loading after fetching or error
         }
@@ -122,10 +118,7 @@ function TweetId() {
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         }
     };
 

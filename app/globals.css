@@ -97,17 +97,9 @@
   }
 }
 
-/* Toaster ---------------------------------------------------------------- */
-.shadcn-toast-success {
-  border-color: hsl(var(--success) / 0.35) !important;
-  color: hsl(var(--success)) !important;
-  font-weight: 600;
-}
-
-.shadcn-toast-failure {
-  border-color: hsl(var(--destructive) / 0.35) !important;
-  color: hsl(var(--destructive)) !important;
-  font-weight: 600;
+/* Toaster (sonner) ----------------------------------------------------- */
+[data-sonner-toaster] {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Utilities ------------------------------------------------------------- */

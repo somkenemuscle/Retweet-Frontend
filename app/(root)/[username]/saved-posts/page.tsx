@@ -7,11 +7,10 @@ import TweetCard from '@/components/ui/tweetCard';
 import Loader from '@/components/ui/Loader';
 import Link from 'next/link';
 import axios from 'axios';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 
 
 function TweetSaves() {
-  const { toast } = useToast();
   const [SavedTweets, setSavedTweets] = useState<Tweet[]>([]);
   const [loading, setLoading] = useState<boolean>(true); // Add loading state
   const params = useParams();
@@ -50,10 +49,7 @@ function TweetSaves() {
       }
 
       // Show error toast notification
-      toast({
-        className: "shadcn-toast-failure",
-        description: errorMessage
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false); // Stop loading after fetching or error
     }
@@ -129,10 +125,7 @@ function TweetSaves() {
       }
 
       // Show error toast notification
-      toast({
-        className: "shadcn-toast-failure",
-        description: errorMessage
-      });
+      toast.error(errorMessage);
     }
   };
 

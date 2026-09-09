@@ -12,7 +12,7 @@ import { Form, FormField } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { useUploadThing } from "@/lib/uploadthing";
 import axiosInstance from "@/lib/axiosInstance";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import { tweetFormSchema } from "@/lib/tweetSchema";
 import { ImageIcon, Smile, X } from "lucide-react";
 import Spinner from "../ui/Spinner";
@@ -25,7 +25,6 @@ import { useDialogStore } from '@/store/dialogStore';
 function CreateInteractionForm({ action }: { action: string }) {
     const { setTweets } = useTweetStore();
     const { startUpload } = useUploadThing("media");
-    const { toast } = useToast();
     const [files, setFiles] = useState<File[]>([]);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -139,15 +138,9 @@ function CreateInteractionForm({ action }: { action: string }) {
                     getAllTweets();
                     const { message } = res.data;
                     setIsDialogOpen(false);
-                    toast({
-                        className: "shadcn-toast-success",
-                        description: message,
-                    });
+                    toast.success(message);
                 } else {
-                    toast({
-                        className: "shadcn-toast-failure",
-                        description: "You have to be logged in to make a post",
-                    });
+                    toast.error("You have to be logged in to make a post");
                 }
             } catch (error: any) {
                 console.error("Error occurred while making a tweet:", error);

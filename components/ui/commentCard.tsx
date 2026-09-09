@@ -6,13 +6,12 @@ import {
     faCircleCheck,
     faTrashCanArrowUp
 } from "@fortawesome/free-solid-svg-icons";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "@/lib/toast";
 import axios from "axios";
 
 import useCommentStore from "@/store/commentStore";
 function CommentCard({ id, tweetId, username, text, createdAt, verification }: CommentCardProps) {
     const { setTweet } = useCommentStore();
-    const { toast } = useToast();
 
 
     const loggedInUsername = localStorage.getItem('username');
@@ -24,10 +23,7 @@ function CommentCard({ id, tweetId, username, text, createdAt, verification }: C
             setTweet(newTweet.data.foundTweet)
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-success",
-                description: res.data.message
-            });
+            toast.success(res.data.message);
 
         } catch (error: any) {
             console.error('Error occurred during signin:', error);
@@ -56,10 +52,7 @@ function CommentCard({ id, tweetId, username, text, createdAt, verification }: C
             }
 
             // Show error toast notification
-            toast({
-                className: "shadcn-toast-failure",
-                description: errorMessage
-            });
+            toast.error(errorMessage);
         }
     }
 
