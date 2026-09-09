@@ -1,8 +1,10 @@
 'use client'
-import { Button } from "@/components/ui/button";
 import {
     Form,
+    FormControl,
     FormField,
+    FormItem,
+    FormLabel,
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -11,32 +13,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { Eye, EyeOff } from 'react-feather';
 import { useState, useRef } from "react";
-import signUpPic from '../../public/assets/images/signup-img.avif';
 import axiosInstance from "@/lib/axiosInstance";
 import ReCAPTCHA from "react-google-recaptcha";
-import Loader from "../ui/Loader"
 import { SignUpFormSchema } from "@/lib/authSchema";
-
+import { AuthHeading, PasswordInput, SubmitButton } from "./authUi";
 
 export default function SignUpForm() {
     const { toast } = useToast();
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
     const recaptchaRef = useRef<ReCAPTCHA>(null);
     const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-
-
-    // Toggle password visibility
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
 
     const form = useForm<z.infer<typeof SignUpFormSchema>>({
         resolver: zodResolver(SignUpFormSchema),
@@ -57,7 +47,6 @@ export default function SignUpForm() {
             recaptchaRef.current.reset();
         }
     };
-
 
     async function onSubmit(values: z.infer<typeof SignUpFormSchema>) {
         try {
@@ -80,7 +69,6 @@ export default function SignUpForm() {
                 recaptchaToken
             });
 
-
             // Extract message from response
             const { message, username } = res.data;
 
@@ -90,12 +78,9 @@ export default function SignUpForm() {
             // Reset the form after successful signup
             form.reset();
 
-
-
             // Clear the reCAPTCHA token
             setRecaptchaToken(null);
             resetRecaptcha();
-
 
             // Redirect to the home page or another route after successful signup
             router.push('/');
@@ -147,124 +132,99 @@ export default function SignUpForm() {
         }
     }
 
-
-
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 md:h-screen">
-            {/* Left section (Form) */}
-            <div className="px-4 py-48 sm:px-6 sm:my-auto md:px-8 md:py-24">
-                <div className="mx-auto max-w-lg text-center">
-                    <h1 className="text-2xl font-bold sm:text-3xl">Create your account</h1>
-                    <p className="mt-3 text-gray-500">
-                        Start your social life with Retweet, we will be glad to have you!
+        <div className="space-y-8">
+            <AuthHeading
+                title="Create your account"
+                subtitle="Join Retweet and start following the conversations you care about."
+            />
+
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <FormField
+                        control={form.control}
+                        name="username"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Username</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        autoComplete="username"
+                                        placeholder="Pick a handle"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="email"
+                                        autoComplete="email"
+                                        placeholder="you@example.com"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <PasswordInput
+                                        autoComplete="new-password"
+                                        placeholder="Create a strong password"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <div className="overflow-hidden rounded-lg border border-border bg-muted/40 p-3">
+                        <ReCAPTCHA
+                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
+                            onChange={onReCAPTCHAChange}
+                            ref={recaptchaRef}
+                        />
+                    </div>
+
+                    <div className="pt-1">
+                        <SubmitButton loading={loading}>Create account</SubmitButton>
+                    </div>
+
+                    <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                        By creating an account you agree to our Terms of Service and
+                        Privacy Policy.
                     </p>
-                </div>
+                </form>
+            </Form>
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto mt-8 max-w-md space-y-4">
-                        {/* Username Field */}
-                        <FormField
-                            control={form.control}
-                            name="username"
-                            render={({ field }) => (
-                                <>
-                                    <Input
-                                        type="text"
-                                        {...field}
-                                        placeholder="Enter username"
-                                        className="w-full rounded-xl border-gray-200 p-6 pe-12 text-sm shadow-sm"
-                                        id="signup-form-input-username"
-                                    />
-                                    <FormMessage className="text-red-600" />
-                                </>
-                            )}
-                        />
-
-                        {/* Email Field */}
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <>
-                                    <Input
-                                        type="text"
-                                        {...field}
-                                        placeholder="Enter email"
-                                        className="w-full rounded-xl border-gray-200 p-6 pe-12 text-sm shadow-sm"
-                                        id="signup-form-input-email"
-                                    />
-                                    <FormMessage className="text-red-600" />
-                                </>
-                            )}
-                        />
-
-                        {/* Password Field */}
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <>
-                                    <div className="relative">
-                                        <Input
-                                            type={showPassword ? 'text' : 'password'}
-                                            {...field}
-                                            placeholder="Enter password"
-                                            className="w-full rounded-xl border-gray-200 p-6 pe-12 text-sm shadow-sm"
-                                            id="signup-form-input-password"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={togglePasswordVisibility}
-                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                        >
-                                            {showPassword ? <EyeOff className="text-gray-400" size={15} /> : <Eye className="text-gray-400" size={15} />}
-                                        </button>
-                                    </div>
-                                    <FormMessage className="text-red-600" />
-                                </>
-                            )}
-                        />
-
-                        <div style={{ transform: 'scale(0.8)', transformOrigin: '0 0', width: '100%', display: 'flex', justifyContent: 'left', marginTop: '15px', marginBottom: '-20px' }}>
-                            <ReCAPTCHA
-                                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY as string}
-                                onChange={onReCAPTCHAChange}
-                                ref={recaptchaRef}
-                            />
-                        </div>
-
-
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-800 p-6"
-                        >
-                            Create account {loading && <span className="ml-3"> <Loader /> </span>}
-                        </Button>
-
-                        {/* Already have account? */}
-                        <p className="text-sm text-center text-gray-500">
-                            Already have an account? <Link className="text-indigo-600 hover:underline" href="/sign-in">Sign in</Link>
-                        </p>
-                    </form>
-                </Form>
-            </div>
-
-            {/* Right section (Image) */}
-            <div className="relative hidden md:block">
-                <Image
-                    alt="Welcome"
-                    src={signUpPic}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    quality={100}
-                    priority
-                />
-            </div>
+            <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link
+                    href="/sign-in"
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                    Sign in
+                </Link>
+            </p>
         </div>
-
-
-
-
     )
 }
-

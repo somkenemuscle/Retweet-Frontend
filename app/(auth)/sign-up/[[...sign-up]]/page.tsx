@@ -1,10 +1,10 @@
+import type { Metadata } from "next"
 import SignUpForm from "@/components/forms/signUpForm"
-const SignUpPage = () => {
-    return (
-        <main>
-            <SignUpForm />
-        </main>
-    )
+
+export const metadata: Metadata = {
+    title: "Create your account — Retweet",
 }
 
-export default SignUpPage
+export default function SignUpPage() {
+    return <SignUpForm />
+}

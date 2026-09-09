@@ -1,8 +1,10 @@
 'use client'
-import { Button } from "@/components/ui/button"
 import {
     Form,
+    FormControl,
     FormField,
+    FormItem,
+    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -11,30 +13,17 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import axios from "axios"
 import { useRouter } from "next/navigation"
-import signInPic from '../../public/assets/images/signin-img.avif'
-import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
-import { Eye, EyeOff } from 'react-feather';
-import { useState } from "react";
-import axiosInstance from "@/lib/axiosInstance";
-import Loader from "../ui/Loader";
+import { useState } from "react"
+import axiosInstance from "@/lib/axiosInstance"
 import { SignInFormSchema } from "@/lib/authSchema"
-
-
-
+import { AuthHeading, PasswordInput, SubmitButton } from "./authUi"
 
 export default function SignInForm() {
     const { toast } = useToast();
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
-    // Toggle password visibility
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
 
     const form = useForm<z.infer<typeof SignInFormSchema>>({
         resolver: zodResolver(SignInFormSchema),
@@ -43,7 +32,6 @@ export default function SignInForm() {
             password: ""
         }
     })
-
 
     async function onSubmit(values: z.infer<typeof SignInFormSchema>) {
         try {
@@ -107,103 +95,69 @@ export default function SignInForm() {
             // Hide the loader after request is complete (either success or error)
             setLoading(false);
         }
-
     }
 
-
-
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 md:h-screen">
-            {/* Left section (Form) */}
-            <div className="px-4 py-48 sm:px-6 sm:my-auto md:px-8 md:py-24">
-                <div className="mx-auto max-w-lg text-center">
-                    <h1 className="text-2xl font-bold sm:text-3xl">Welcome back</h1>
-                    <p className="mt-3 text-gray-500">
-                        We are glad to have you back here at Retweet!
-                    </p>
-                </div>
+        <div className="space-y-8">
+            <AuthHeading
+                title="Welcome back"
+                subtitle="Sign in to pick up where the conversation left off."
+            />
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="mx-auto mt-8 max-w-md space-y-4">
-                        {/* Username Field */}
-                        <FormField
-                            control={form.control}
-                            name="username"
-                            render={({ field }) => (
-                                <>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                    <FormField
+                        control={form.control}
+                        name="username"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Username</FormLabel>
+                                <FormControl>
                                     <Input
                                         type="text"
+                                        autoComplete="username"
+                                        placeholder="yourhandle"
                                         {...field}
-                                        placeholder="Enter username"
-                                        className="w-full rounded-xl border-gray-200 p-6 pe-12 text-sm shadow-sm"
-                                        id="signin-form-input-username"
                                     />
-                                    <FormMessage className="text-red-600" />
-                                </>
-                            )}
-                        />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        {/* Password Field */}
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <>
-                                    <div className="relative">
-                                        <Input
-                                            type={showPassword ? 'text' : 'password'}
-                                            {...field}
-                                            placeholder="Enter password"
-                                            className="w-full rounded-xl border-gray-200 p-6 pe-12 text-sm shadow-sm"
-                                            id="signin-form-input-password"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={togglePasswordVisibility}
-                                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                                        >
-                                            {showPassword ? <EyeOff className="text-gray-400" size={15} /> : <Eye className="text-gray-400" size={15} />}
-                                        </button>
-                                    </div>
-                                    <FormMessage className="text-red-600" />
-                                </>
-                            )}
-                        />
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <PasswordInput
+                                        autoComplete="current-password"
+                                        placeholder="Enter your password"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                        {/* Submit Button */}
-                        <Button
-                            type="submit"
-                            className="w-full text-center rounded-xl bg-black text-sm font-medium text-white hover:bg-slate-900 p-6">
-                            Sign In  {loading && <span className="ml-3"> <Loader /> </span>}
-                        </Button>
+                    <div className="pt-1">
+                        <SubmitButton loading={loading}>Sign in</SubmitButton>
+                    </div>
+                </form>
+            </Form>
 
-                        {/* Sign-up Prompt */}
-                        <p className="text-sm text-center text-gray-500">
-                            New to Retweet? <Link className="text-indigo-600 hover:underline" href="/sign-up">Create account here</Link>
-                        </p>
-
-                        <p className="text-sm text-right text-indigo-600">
-                            <span aria-hidden="true">&larr;</span><Link className="hover:underline" href="/"> Go Back</Link>
-                        </p>
-                    </form>
-                </Form>
-            </div>
-
-            {/* Right section (Image) */}
-            <div className="relative hidden md:block">
-                <Image
-                    alt="Welcome"
-                    src={signInPic}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    quality={100}
-                    priority
-                />
-            </div>
+            <p className="text-center text-sm text-muted-foreground">
+                New to Retweet?{" "}
+                <Link
+                    href="/sign-up"
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                >
+                    Create an account
+                </Link>
+            </p>
         </div>
-
-
-
-
     )
 }
-
