@@ -4,151 +4,144 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormField, Form } from "../ui/form";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { AutosizeTextarea } from "@/components/ui/AutosizeTextarea";
 import { useState, useEffect, useRef } from "react";
 import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "@/lib/toast";
-import Loader from "../ui/Loader";
+import Spinner from "../ui/Spinner";
+import Avatar from "../ui/Avatar";
 import useCommentStore from "@/store/commentStore";
-import axios from "axios";
-import EmojiPicker from 'emoji-picker-react';
-import { FaSmile } from "react-icons/fa"; // Icon for the emoji picker
+import EmojiPicker, { Theme as EmojiTheme } from "emoji-picker-react";
+import { Smile } from "lucide-react";
 
-const commentFormSchema = z.object({
-    text: z.string()
-});
+const commentFormSchema = z.object({ text: z.string() });
 
-function CreateCommentForm({ action, tweetId }: { action: string, tweetId: string }) {
+function CreateCommentForm({ action, tweetId }: { action: string; tweetId: string }) {
     const [loading, setLoading] = useState(false);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [username, setUsername] = useState<string | null>(null);
     const { setTweet } = useCommentStore();
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false); // Emoji picker state
-    const emojiPickerRef = useRef<HTMLDivElement>(null); // Ref for the emoji picker
+    const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const form = useForm<z.infer<typeof commentFormSchema>>({
         resolver: zodResolver(commentFormSchema),
         defaultValues: { text: "" },
     });
 
+    useEffect(() => {
+        setUsername(localStorage.getItem("username"));
+    }, []);
+
+    useEffect(() => {
+        const onClick = (e: MouseEvent) => {
+            if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+                setShowEmojiPicker(false);
+            }
+        };
+        document.addEventListener("mousedown", onClick);
+        return () => document.removeEventListener("mousedown", onClick);
+    }, []);
+
+    const handleEmojiClick = (emojiObject: any) => {
+        form.setValue("text", form.getValues("text") + emojiObject.emoji);
+    };
+
     async function getTweet() {
         try {
             const res = await axiosInstance.get(`/tweets/${tweetId}`);
             setTweet(res.data.foundTweet);
         } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-            let errorMessage = 'An error occurred. Please try again.';
-
-            if (axios.isAxiosError(error)) {
-                if (error.response) {
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            toast.error(errorMessage);
+            const msg =
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "Couldn't refresh replies.";
+            toast.error(msg);
         }
     }
 
     async function onSubmit(values: z.infer<typeof commentFormSchema>) {
+        if (!values.text.trim() || action !== "Add") return;
         setLoading(true);
-        const username = localStorage.getItem("username");
-
-        if (action === "Add") {
-            try {
-                form.reset();
-
-                if (username) {
-                    const res = await axiosInstance.post(`/tweets/${tweetId}/comments`, {
-                        comment: values?.text
-                    });
-                    getTweet();
-                    const { message } = res.data;
-                    toast.success(message);
-                } else {
-                    toast.error("You have to be logged in to comment");
-                }
-            } catch (error: any) {
-                console.error("Error occurred while posting a comment:", error);
-            } finally {
-                setLoading(false);
+        const me = localStorage.getItem("username");
+        try {
+            if (!me) {
+                toast.error("You have to be logged in to reply");
+                return;
             }
+            form.reset();
+            const res = await axiosInstance.post(`/tweets/${tweetId}/comments`, {
+                comment: values.text,
+            });
+            getTweet();
+            toast.success(res.data.message);
+        } catch (error: any) {
+            console.error("Error occurred while posting a comment:", error);
+        } finally {
+            setLoading(false);
         }
     }
 
-    // Add emoji to the textarea
-    const handleEmojiClick = (emojiObject: any) => {
-        form.setValue('text', form.getValues('text') + emojiObject.emoji);
+    const textValue = form.watch("text") ?? "";
+    const canReply = !loading && !!textValue.trim();
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canReply) {
+            form.handleSubmit(onSubmit)();
+        }
     };
 
-    // Handle clicks outside of the emoji picker
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
-                setShowEmojiPicker(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, []);
-
     return (
-        <div className="p-6 shadow-md max-w-full mx-auto my-8 rounded-xl border border-gray-900">
+        <div className="border-b border-border px-4 py-3">
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <div className="flex">
-                        <div className="w-full">
-                            <FormField
-                                control={form.control}
-                                name="text"
-                                render={({ field }) => (
-                                    <Textarea
-                                        rows={3}
-                                        {...field}
-                                        placeholder="Post your reply..."
-                                        className="w-full px-4 py-3 border-none bg-gray-900 text-white rounded-xl focus:outline-none"
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex gap-3">
+                    <Avatar username={username ?? ""} size={38} className="mt-1" />
 
-                    <div className="flex justify-between items-center">
-                        <div className="relative" ref={emojiPickerRef}>
-                            <button
-                                type="button"
-                                className="text-yellow-400"
-                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            >
-                                <FaSmile className="w-6 h-6" />
-                            </button>
-                            {showEmojiPicker && (
-                                <div className="absolute z-10">
-                                    <EmojiPicker
-                                        onEmojiClick={handleEmojiClick}
-                                    />
-                                </div>
+                    <div className="min-w-0 flex-1">
+                        <FormField
+                            control={form.control}
+                            name="text"
+                            render={({ field }) => (
+                                <AutosizeTextarea
+                                    {...field}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Post your reply…"
+                                    minHeight={44}
+                                    className="py-2 text-[17px] leading-relaxed text-foreground"
+                                />
                             )}
-                        </div>
+                        />
 
-                        <Button
-                            type="submit"
-                            className="px-4 bg-blue-500 rounded-xl hover:bg-blue-700 py-2"
-                        >
-                            Reply {loading && <span className="ml-3"> <Loader /> </span>}
-                        </Button>
+                        <div className="mt-1 flex items-center justify-between">
+                            <div className="relative text-primary" ref={emojiPickerRef}>
+                                <button
+                                    type="button"
+                                    aria-label="Add emoji"
+                                    className="rounded-full p-2 transition-colors hover:bg-primary/10"
+                                    onClick={() => setShowEmojiPicker((s) => !s)}
+                                >
+                                    <Smile className="h-[19px] w-[19px]" />
+                                </button>
+                                {showEmojiPicker && (
+                                    <div className="absolute left-0 top-full z-30 mt-1 animate-scale-in overflow-hidden rounded-xl border border-border shadow-xl">
+                                        <EmojiPicker
+                                            onEmojiClick={handleEmojiClick}
+                                            theme={EmojiTheme.DARK}
+                                            width={320}
+                                            height={380}
+                                            lazyLoadEmojis
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={!canReply}
+                                className="rounded-full px-5 font-semibold"
+                            >
+                                {loading ? <Spinner size={16} /> : "Reply"}
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </Form>

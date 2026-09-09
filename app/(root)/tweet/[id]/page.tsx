@@ -1,189 +1,134 @@
 'use client';
 
-import { useParams } from 'next/navigation';
-import axiosInstance from '@/lib/axiosInstance';
 import { useEffect, useState } from 'react';
-import TweetCard from '@/components/ui/tweetCard';
-import Loader from '@/components/ui/Loader';
-import Link from 'next/link';
-import CommentCard from '@/components/ui/commentCard';
+import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { toast } from "@/lib/toast";
-import CreateCommentForm from '@/components/forms/createComment';
+import axiosInstance from '@/lib/axiosInstance';
+import { toast } from '@/lib/toast';
+import { ArrowLeft } from 'lucide-react';
 import useCommentStore from '@/store/commentStore';
+import FocusedTweet from '@/components/shared/FocusedTweet';
+import CommentCard from '@/components/ui/commentCard';
+import CreateCommentForm from '@/components/forms/createComment';
+import { Skeleton } from '@/components/ui/skeleton';
 
-
-function TweetId() {
-    const { tweet, setTweet } = useCommentStore();
-    const [loading, setLoading] = useState<boolean>(true); // Add loading state
-
-
-    const params = useParams();
-    const id = params.id;
-
-    async function getTweet() {
-        try {
-            const res = await axiosInstance.get(`/tweets/${id}`);
-            setTweet(res.data.foundTweet);
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false); // Stop loading after fetching or error
-        }
+function errMsg(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+        return (
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            (error.response ? 'An error occurred. Please try again.' : 'Network error. Please try again.')
+        );
     }
+    return 'An unexpected error occurred. Please try again later.';
+}
 
-
-    useEffect(() => {
-        if (id) {
-            getTweet();
-        }
-    }, []);
-
-
-
-
-    const handleLikes = async (tweetId: string) => {
-        // Get the logged-in username from localStorage
-        const loggedInUsername = localStorage.getItem('username');
-        // Ensure the loggedInUsername is a string and not null
-        if (!loggedInUsername) {
-            console.error('No logged-in user found.');
-            return;
-        }
-        // Check if the tweet exists in the state
-        if (!tweet || tweet._id !== tweetId) return;
-
-        // Check if the current user has already liked the tweet
-        const userAlreadyLiked = tweet.likes.some((like) => like.username === loggedInUsername);
-
-        // Optimistically update the UI
-        const updatedLikes = userAlreadyLiked
-            ? tweet.likes.filter((like) => like.username !== loggedInUsername)  // Unlike
-            : [...tweet.likes, { username: loggedInUsername }];  // Like
-
-        // Update the state optimistically
-        const updatedTweet = {
-            ...tweet,
-            likes: updatedLikes
-        };
-
-        setTweet(updatedTweet);  // Update the single tweet in the state
-
-
-        try {
-            await axiosInstance.post(`/tweets/${tweetId}/like`);
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast.error(errorMessage);
-        }
-    };
-
-
-
-
+function DetailSkeleton() {
     return (
-        <div className="cursor-pointer mt-9 mb-24 container mx-auto max-w-lg p-0">
-            <div className='border border-slate-900 p-3 mb-4 rounded-xl'>
-                <Link href={'/'}>
-                    <span className='hover:bg-gray-700 transition rounded-full p-2' aria-hidden="true">←</span>
-                    <span className='ml-8 text-gray-300'> Go back to post</span>
-                </Link>
+        <div className="px-4 py-4">
+            <div className="flex items-center gap-3">
+                <Skeleton className="h-11 w-11 rounded-full" />
+                <div className="space-y-2">
+                    <Skeleton className="h-3.5 w-32" />
+                    <Skeleton className="h-3 w-24" />
+                </div>
             </div>
-            <span>
-                {loading ? (
-                    <div className="flex justify-center items-center mt-10">
-                        <Loader />
-                    </div>
-                ) : !tweet ? (
-                    <div className="flex justify-center items-center mt-10">
-                        <span>
-                            <p className='text-gray-400 mt-24'>This post does not exist</p>
-                        </span>
-                    </div>
-                ) : (
-                    <>
-                        <TweetCard
-                            key={tweet._id}
-                            id={tweet._id}
-                            username={tweet.author?.username}
-                            image={tweet.image}
-                            text={tweet.text}
-                            createdAt={tweet.createdAt}
-                            likes={tweet.likes}
-                            verification={tweet.author.verification}
-                            handleLikes={handleLikes}
-                        />
-
-                        <CreateCommentForm tweetId={`${id}`} action='Add' />
-
-                        {tweet.comments.map((comment, index) => (
-                            <CommentCard
-                                key={index}
-                                id={comment._id}
-                                tweetId={tweet._id}
-                                username={comment.author.username}
-                                text={comment.comment}
-                                createdAt={comment.createdAt}
-                                verification={comment.author.verification}
-                            />
-                        ))}
-                    </>
-                )}
-            </span>
+            <Skeleton className="mt-4 h-4 w-full" />
+            <Skeleton className="mt-2 h-4 w-3/4" />
         </div>
     );
 }
 
-export default TweetId;
+export default function TweetDetailPage() {
+    const params = useParams();
+    const router = useRouter();
+    const id = String(params.id ?? '');
+    const { tweet, setTweet } = useCommentStore();
+    const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        let active = true;
+        setLoading(true);
+        axiosInstance
+            .get(`/tweets/${id}`)
+            .then((res) => active && setTweet(res.data.foundTweet))
+            .catch((error) => active && toast.error(errMsg(error)))
+            .finally(() => active && setLoading(false));
+        return () => {
+            active = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
+
+    const handleLike = async () => {
+        const me = localStorage.getItem('username');
+        if (!me || !tweet || tweet._id !== id) return;
+
+        const liked = tweet.likes.some((l) => l.username === me);
+        const prev = tweet;
+        setTweet({
+            ...tweet,
+            likes: liked
+                ? tweet.likes.filter((l) => l.username !== me)
+                : [...tweet.likes, { username: me }],
+        });
+
+        try {
+            await axiosInstance.post(`/tweets/${id}/like`);
+        } catch (error) {
+            setTweet(prev);
+            toast.error(errMsg(error));
+        }
+    };
+
+    return (
+        <div>
+            <header className="sticky top-0 z-30 flex items-center gap-5 border-b border-border bg-background/80 px-4 py-2.5 backdrop-blur">
+                <button
+                    onClick={() => router.back()}
+                    aria-label="Back"
+                    className="rounded-full p-2 transition-colors hover:bg-accent"
+                >
+                    <ArrowLeft className="h-[18px] w-[18px]" />
+                </button>
+                <h1 className="text-lg font-bold tracking-tight">Post</h1>
+            </header>
+
+            {loading ? (
+                <DetailSkeleton />
+            ) : !tweet ? (
+                <div className="px-8 py-16 text-center">
+                    <p className="text-lg font-semibold">This post doesn&apos;t exist</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        It may have been deleted, or the link is wrong.
+                    </p>
+                </div>
+            ) : (
+                <>
+                    <FocusedTweet tweet={tweet} onLike={handleLike} />
+                    <CreateCommentForm tweetId={id} action="Add" />
+
+                    {tweet.comments && tweet.comments.length > 0 ? (
+                        <ul>
+                            {tweet.comments.map((comment) => (
+                                <CommentCard
+                                    key={comment._id}
+                                    id={comment._id}
+                                    tweetId={tweet._id}
+                                    username={comment.author.username}
+                                    text={comment.comment}
+                                    createdAt={comment.createdAt}
+                                    verification={comment.author.verification}
+                                />
+                            ))}
+                        </ul>
+                    ) : (
+                        <div className="px-8 py-12 text-center text-sm text-muted-foreground">
+                            No replies yet — be the first.
+                        </div>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}

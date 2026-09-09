@@ -6,18 +6,16 @@ interface Tweet {
       username: string;
       verification: boolean;
    }
-   comments: [
-      {
+   comments: {
+      _id: string;
+      comment: string;
+      createdAt: string;
+      author: {
          _id: string;
-         comment: string;
-         createdAt: string;
-         author: {
-            _id: string;
-            username: string;
-            verification: boolean;
-         }
+         username: string;
+         verification: boolean;
       }
-   ];
+   }[];
    createdAt: string;
    updatedAt: string;
    likes: {

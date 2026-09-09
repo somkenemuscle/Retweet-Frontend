@@ -1,98 +1,98 @@
-import Image from "next/image"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Link from "next/link";
-import axiosInstance from "@/lib/axiosInstance";
-import {
-    faCircleCheck,
-    faTrashCanArrowUp
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "@/lib/toast";
-import axios from "axios";
+'use client'
+import { useState } from "react"
+import Link from "next/link"
+import { MoreHorizontal, Trash2, BadgeCheck } from "lucide-react"
+import axios from "axios"
+import axiosInstance from "@/lib/axiosInstance"
+import { toast } from "@/lib/toast"
+import Avatar from "@/components/ui/Avatar"
+import { formatRelativeTime } from "@/lib/utils"
+import useCommentStore from "@/store/commentStore"
 
-import useCommentStore from "@/store/commentStore";
+function errMsg(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+        return (
+            error.response?.data?.error ||
+            error.response?.data?.message ||
+            (error.response ? "An error occurred. Please try again." : "Network error. Please try again.")
+        )
+    }
+    return "An unexpected error occurred. Please try again later."
+}
+
 function CommentCard({ id, tweetId, username, text, createdAt, verification }: CommentCardProps) {
-    const { setTweet } = useCommentStore();
+    const { setTweet } = useCommentStore()
+    const [menuOpen, setMenuOpen] = useState(false)
 
+    const loggedInUsername = typeof window !== 'undefined' ? localStorage.getItem('username') : null
+    const isOwner = loggedInUsername === username
 
-    const loggedInUsername = localStorage.getItem('username');
-
-    const handleDelete = async (commentId: string, tweetId: string) => {
+    const handleDelete = async () => {
+        setMenuOpen(false)
         try {
-            const res = await axiosInstance.delete(`/tweets/${tweetId}/comments/${commentId}`);
-            const newTweet = await axiosInstance.get(`/tweets/${tweetId}`);
-            setTweet(newTweet.data.foundTweet)
-
-            // Show error toast notification
-            toast.success(res.data.message);
-
-        } catch (error: any) {
-            console.error('Error occurred during signin:', error);
-
-            // Default error message
-            let errorMessage = 'An error occurred. Please try again.';
-
-            // Check if the error is an Axios error
-            if (axios.isAxiosError(error)) {
-                // Check for a response error
-                if (error.response) {
-                    // Extract message from response if available
-                    const responseMessage = error.response.data?.error;
-                    if (responseMessage) {
-                        errorMessage = responseMessage;
-                    } else {
-                        errorMessage = error.response.data?.message || errorMessage;
-                    }
-                } else {
-                    // Handle cases where no response is available (e.g., network errors)
-                    errorMessage = 'Network error. Please try again.';
-                }
-            } else {
-                // Handle unexpected error types
-                errorMessage = 'An unexpected error occurred. Please try again later.';
-            }
-
-            // Show error toast notification
-            toast.error(errorMessage);
+            const res = await axiosInstance.delete(`/tweets/${tweetId}/comments/${id}`)
+            const refreshed = await axiosInstance.get(`/tweets/${tweetId}`)
+            setTweet(refreshed.data.foundTweet)
+            toast.success(res.data.message)
+        } catch (error) {
+            toast.error(errMsg(error))
         }
     }
 
     return (
-        <span>
-            <li className="border-gray-900 rounded-xl flex p-4 border-[0.5px]">
-                <div className="flex flex-col flex-grow">
-                    <div className="flex items-center mb-2">
-                        <Image
-                            src='/assets/images/prof.png'
-                            alt="profilepic"
-                            width={100}
-                            height={100}
-                            className="w-8 h-8 rounded-full mr-2"
-                            quality={100}
-                            priority
-                        />
-                        <div className="flex items-center justify-between w-full mb-2">
-                            <Link href={`/${username}`} className="flex-grow">
-                                <p className="text-white">
-                                    <span className="hover:underline">{username} </span>
-                                    {verification && (
-                                        <FontAwesomeIcon icon={faCircleCheck} style={{ fontSize: 15, color: "#1DA1F2" }} />
-                                    )}
-                                    <span className="text-gray-500"> @{username}.</span>
-                                    <span className="text-gray-500 text-sm">{new Date(createdAt).toLocaleDateString()}</span>
-                                </p>
-                            </Link>
-                            {loggedInUsername === username && (
-                                <span className="ml-4 cursor-pointer text-gray-500 hover:text-red-600 ">
-                                    <FontAwesomeIcon onClick={() => handleDelete(id, tweetId)} icon={faTrashCanArrowUp} style={{ fontSize: 12 }} />
-                                </span>
+        <li className="flex gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/30">
+            <Link href={`/${username}`} className="shrink-0">
+                <Avatar username={username} size={36} />
+            </Link>
+
+            <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1 text-[15px]">
+                    <Link href={`/${username}`} className="truncate font-semibold hover:underline">
+                        {username}
+                    </Link>
+                    {verification && (
+                        <BadgeCheck className="h-4 w-4 shrink-0 text-primary" aria-label="Verified" />
+                    )}
+                    <span className="truncate text-muted-foreground">@{username}</span>
+                    <span className="text-muted-foreground">·</span>
+                    <time
+                        title={new Date(createdAt).toLocaleString()}
+                        className="shrink-0 text-muted-foreground"
+                    >
+                        {formatRelativeTime(createdAt)}
+                    </time>
+
+                    {isOwner && (
+                        <div className="relative ml-auto">
+                            <button
+                                onClick={() => setMenuOpen((o) => !o)}
+                                aria-label="More"
+                                className="-mr-2 rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+                            >
+                                <MoreHorizontal className="h-4 w-4" />
+                            </button>
+                            {menuOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                                    <div className="absolute right-0 z-20 mt-1 w-36 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg">
+                                        <button
+                                            onClick={handleDelete}
+                                            className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
+                                        >
+                                            <Trash2 className="h-4 w-4" /> Delete
+                                        </button>
+                                    </div>
+                                </>
                             )}
                         </div>
-                    </div>
-                    <h4 className="text-md font-normal mb-2">{text}</h4>
+                    )}
                 </div>
 
-            </li>
-        </span>
+                <p className="mt-0.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-foreground">
+                    {text}
+                </p>
+            </div>
+        </li>
     )
 }
 
