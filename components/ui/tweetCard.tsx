@@ -32,7 +32,7 @@ function extractErrorMessage(error: any): string {
     return 'An unexpected error occurred. Please try again later.'
 }
 
-function TweetCard({ id, username, text, image, createdAt, likes, verification, handleLikes }: TweetCardProps) {
+function TweetCard({ id, username, text, image, createdAt, likes, commentCount = 0, verification, handleLikes }: TweetCardProps) {
     const { setTweets } = useTweetStore()
     const router = useRouter()
     const [menuOpen, setMenuOpen] = useState(false)
@@ -183,6 +183,7 @@ function TweetCard({ id, username, text, image, createdAt, likes, verification, 
                         <span className="rounded-full p-1.5 transition-colors group-hover:bg-primary/10">
                             <MessageCircle className="h-[18px] w-[18px]" />
                         </span>
+                        {commentCount > 0 && <span>{commentCount}</span>}
                     </button>
 
                     <button

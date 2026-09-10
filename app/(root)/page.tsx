@@ -158,6 +158,7 @@ export default function Home() {
               createdAt={tweet.createdAt}
               verification={tweet.author.verification}
               likes={tweet.likes}
+              commentCount={tweet.comments?.length ?? 0}
               handleLikes={handleLikes}
             />
           ))}
