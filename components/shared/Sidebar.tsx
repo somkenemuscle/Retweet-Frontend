@@ -117,15 +117,15 @@ export default function Sidebar() {
                     );
                 })}
 
-                <Button
-                    onClick={() => setIsDialogOpen(true)}
-                    className="mt-3 h-12 w-12 rounded-full p-0 text-base font-semibold shadow-sm lg:w-full lg:px-6"
-                >
-                    <Feather className="h-5 w-5 lg:hidden" />
-                    <span className="hidden lg:inline">Post</span>
-                </Button>
+                <div className="relative mt-auto space-y-2 pt-3" ref={menuRef}>
+                    <Button
+                        onClick={() => setIsDialogOpen(true)}
+                        className="h-12 w-12 rounded-full p-0 text-base font-semibold shadow-sm lg:w-full lg:px-6"
+                    >
+                        <Feather className="h-5 w-5 lg:hidden" />
+                        <span className="hidden lg:inline">Post</span>
+                    </Button>
 
-                <div className="relative mt-auto" ref={menuRef}>
                     {menuOpen && username && (
                         <div className="absolute bottom-full left-0 mb-2 w-56 animate-scale-in overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-xl">
                             <Link
