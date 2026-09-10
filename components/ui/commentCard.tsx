@@ -2,41 +2,20 @@
 import { useState } from "react"
 import Link from "next/link"
 import { MoreHorizontal, Trash2, BadgeCheck } from "lucide-react"
-import axios from "axios"
-import axiosInstance from "@/lib/axiosInstance"
-import { toast } from "@/lib/toast"
 import Avatar from "@/components/ui/Avatar"
+import { useDeleteComment } from "@/lib/api"
 import { formatRelativeTime } from "@/lib/utils"
-import useCommentStore from "@/store/commentStore"
-
-function errMsg(error: unknown): string {
-    if (axios.isAxiosError(error)) {
-        return (
-            error.response?.data?.error ||
-            error.response?.data?.message ||
-            (error.response ? "An error occurred. Please try again." : "Network error. Please try again.")
-        )
-    }
-    return "An unexpected error occurred. Please try again later."
-}
 
 function CommentCard({ id, tweetId, username, text, createdAt, verification }: CommentCardProps) {
-    const { setTweet } = useCommentStore()
+    const deleteComment = useDeleteComment(tweetId)
     const [menuOpen, setMenuOpen] = useState(false)
 
     const loggedInUsername = typeof window !== 'undefined' ? localStorage.getItem('username') : null
     const isOwner = loggedInUsername === username
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         setMenuOpen(false)
-        try {
-            const res = await axiosInstance.delete(`/tweets/${tweetId}/comments/${id}`)
-            const refreshed = await axiosInstance.get(`/tweets/${tweetId}`)
-            setTweet(refreshed.data.foundTweet)
-            toast.success(res.data.message)
-        } catch (error) {
-            toast.error(errMsg(error))
-        }
+        deleteComment.mutate(id)
     }
 
     return (

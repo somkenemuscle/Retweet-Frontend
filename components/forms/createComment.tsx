@@ -6,21 +6,19 @@ import { FormField, Form } from "../ui/form";
 import { Button } from "@/components/ui/button";
 import { AutosizeTextarea } from "@/components/ui/AutosizeTextarea";
 import { useState, useEffect, useRef } from "react";
-import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "@/lib/toast";
+import { useCreateComment } from "@/lib/api";
 import Spinner from "../ui/Spinner";
 import Avatar from "../ui/Avatar";
-import useCommentStore from "@/store/commentStore";
 import EmojiPicker, { Theme as EmojiTheme } from "emoji-picker-react";
 import { Smile } from "lucide-react";
 
 const commentFormSchema = z.object({ text: z.string() });
 
 function CreateCommentForm({ action, tweetId }: { action: string; tweetId: string }) {
-    const [loading, setLoading] = useState(false);
+    const createComment = useCreateComment(tweetId);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const [username, setUsername] = useState<string | null>(null);
-    const { setTweet } = useCommentStore();
     const emojiPickerRef = useRef<HTMLDivElement>(null);
 
     const form = useForm<z.infer<typeof commentFormSchema>>({
@@ -46,43 +44,19 @@ function CreateCommentForm({ action, tweetId }: { action: string; tweetId: strin
         form.setValue("text", form.getValues("text") + emojiObject.emoji);
     };
 
-    async function getTweet() {
-        try {
-            const res = await axiosInstance.get(`/tweets/${tweetId}`);
-            setTweet(res.data.foundTweet);
-        } catch (error: any) {
-            const msg =
-                error?.response?.data?.error ||
-                error?.response?.data?.message ||
-                "Couldn't refresh replies.";
-            toast.error(msg);
-        }
-    }
-
-    async function onSubmit(values: z.infer<typeof commentFormSchema>) {
+    function onSubmit(values: z.infer<typeof commentFormSchema>) {
         if (!values.text.trim() || action !== "Add") return;
-        setLoading(true);
-        const me = localStorage.getItem("username");
-        try {
-            if (!me) {
-                toast.error("You have to be logged in to reply");
-                return;
-            }
-            form.reset();
-            const res = await axiosInstance.post(`/tweets/${tweetId}/comments`, {
-                comment: values.text,
-            });
-            getTweet();
-            toast.success(res.data.message);
-        } catch (error: any) {
-            console.error("Error occurred while posting a comment:", error);
-        } finally {
-            setLoading(false);
+        if (!localStorage.getItem("username")) {
+            toast.error("You have to be logged in to reply");
+            return;
         }
+        createComment.mutate(values.text, {
+            onSuccess: () => form.reset(),
+        });
     }
 
     const textValue = form.watch("text") ?? "";
-    const canReply = !loading && !!textValue.trim();
+    const canReply = !createComment.isPending && !!textValue.trim();
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && canReply) {
@@ -139,7 +113,7 @@ function CreateCommentForm({ action, tweetId }: { action: string; tweetId: strin
                                 disabled={!canReply}
                                 className="rounded-full px-5 font-semibold"
                             >
-                                {loading ? <Spinner size={16} /> : "Reply"}
+                                {createComment.isPending ? <Spinner size={16} /> : "Reply"}
                             </Button>
                         </div>
                     </div>

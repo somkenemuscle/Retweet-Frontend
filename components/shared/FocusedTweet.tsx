@@ -14,30 +14,16 @@ import {
     BadgeCheck,
     Check,
 } from "lucide-react";
-import axios from "axios";
-import axiosInstance from "@/lib/axiosInstance";
-import { toast } from "@/lib/toast";
 import Avatar from "@/components/ui/Avatar";
+import { useLikeTweet, useSaveTweet, useDeleteTweet } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-function errMsg(error: unknown): string {
-    if (axios.isAxiosError(error)) {
-        return (
-            error.response?.data?.error ||
-            error.response?.data?.message ||
-            (error.response ? "An error occurred. Please try again." : "Network error. Please try again.")
-        );
-    }
-    return "An unexpected error occurred. Please try again later.";
-}
-
-type FocusedTweetProps = {
-    tweet: Tweet;
-    onLike: () => void;
-};
-
-export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
+export default function FocusedTweet({ tweet }: { tweet: Tweet }) {
     const router = useRouter();
+    const like = useLikeTweet();
+    const save = useSaveTweet();
+    const del = useDeleteTweet();
+
     const [menuOpen, setMenuOpen] = useState(false);
     const [saved, setSaved] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -56,20 +42,19 @@ export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
         year: "numeric",
     });
 
-    const like = () => {
+    const onLike = () => {
         if (!liked) setJustLiked(true);
-        onLike();
+        like.mutate(tweet._id);
     };
 
-    const save = async () => {
+    const onSave = () => {
         setSaved((s) => !s);
-        try {
-            const res = await axiosInstance.post(`/tweets/${tweet._id}/save`);
-            toast.success(res.data.message);
-        } catch (error) {
-            setSaved((s) => !s);
-            toast.error(errMsg(error));
-        }
+        save.mutate(tweet._id);
+    };
+
+    const onDelete = () => {
+        setMenuOpen(false);
+        del.mutate(tweet._id, { onSuccess: () => router.push("/") });
     };
 
     const share = async () => {
@@ -79,17 +64,6 @@ export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
             setTimeout(() => setCopied(false), 1800);
         } catch {
             /* noop */
-        }
-    };
-
-    const remove = async () => {
-        setMenuOpen(false);
-        try {
-            const res = await axiosInstance.delete(`/tweets/${tweet._id}`);
-            toast.success(res.data.message);
-            router.push("/");
-        } catch (error) {
-            toast.error(errMsg(error));
         }
     };
 
@@ -123,7 +97,7 @@ export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
                                 <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
                                 <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg">
                                     <button
-                                        onClick={remove}
+                                        onClick={onDelete}
                                         className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                                     >
                                         <Trash2 className="h-4 w-4" /> Delete
@@ -171,7 +145,7 @@ export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
                     <MessageCircle className="h-[20px] w-[20px]" />
                 </button>
                 <button
-                    onClick={like}
+                    onClick={onLike}
                     aria-label="Like"
                     aria-pressed={liked}
                     className={cn(
@@ -185,7 +159,7 @@ export default function FocusedTweet({ tweet, onLike }: FocusedTweetProps) {
                     />
                 </button>
                 <button
-                    onClick={save}
+                    onClick={onSave}
                     aria-label="Save"
                     aria-pressed={saved}
                     className={cn(

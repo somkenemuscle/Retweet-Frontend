@@ -3,51 +3,30 @@
 import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Search, X, ChevronRight } from "lucide-react"
-import axiosInstance from "@/lib/axiosInstance"
+import { useSearchUsers } from "@/lib/api"
 import Avatar from "@/components/ui/Avatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
-
-type Status = "idle" | "loading" | "done"
 
 export default function SearchPage() {
     const [value, setValue] = useState("")
-    const [results, setResults] = useState<string[]>([])
-    const [status, setStatus] = useState<Status>("idle")
+    const [debounced, setDebounced] = useState("")
     const inputRef = useRef<HTMLInputElement>(null)
-    const reqId = useRef(0)
 
-    // Debounce the query and ignore out-of-order responses.
     useEffect(() => {
-        const q = value.trim()
-        if (!q) {
-            setResults([])
-            setStatus("idle")
-            return
-        }
-
-        setStatus("loading")
-        const id = ++reqId.current
-        const t = setTimeout(async () => {
-            try {
-                const res = await axiosInstance.get(`/auth/search/${encodeURIComponent(q)}`)
-                if (id !== reqId.current) return
-                setResults(res.data.usernames ?? [])
-            } catch {
-                if (id !== reqId.current) return
-                setResults([])
-            } finally {
-                if (id === reqId.current) setStatus("done")
-            }
-        }, 300)
-
+        const t = setTimeout(() => setDebounced(value.trim()), 300)
         return () => clearTimeout(t)
     }, [value])
+
+    const { data: results = [], isFetching } = useSearchUsers(debounced)
 
     const clear = () => {
         setValue("")
         inputRef.current?.focus()
     }
+
+    const hasQuery = debounced.length > 0
+    const showLoading = hasQuery && isFetching && results.length === 0
+    const showEmpty = hasQuery && !isFetching && results.length === 0
 
     return (
         <div>
@@ -76,7 +55,7 @@ export default function SearchPage() {
                 </div>
             </header>
 
-            {status === "idle" && (
+            {!hasQuery && (
                 <div className="px-8 py-16 text-center">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                         <Search className="h-5 w-5 text-muted-foreground" />
@@ -88,7 +67,7 @@ export default function SearchPage() {
                 </div>
             )}
 
-            {status === "loading" && (
+            {showLoading && (
                 <ul>
                     {Array.from({ length: 5 }).map((_, i) => (
                         <li key={i} className="flex items-center gap-3 px-4 py-3">
@@ -102,24 +81,22 @@ export default function SearchPage() {
                 </ul>
             )}
 
-            {status === "done" && results.length === 0 && (
+            {showEmpty && (
                 <div className="px-8 py-16 text-center">
                     <p className="font-semibold">No people found</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Nothing matched “{value.trim()}”. Try a different username.
+                        Nothing matched “{debounced}”. Try a different username.
                     </p>
                 </div>
             )}
 
-            {status === "done" && results.length > 0 && (
+            {results.length > 0 && (
                 <ul>
                     {results.map((username) => (
                         <li key={username}>
                             <Link
                                 href={`/${username}`}
-                                className={cn(
-                                    "group flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/40"
-                                )}
+                                className="group flex items-center gap-3 border-b border-border px-4 py-3 transition-colors hover:bg-muted/40"
                             >
                                 <Avatar username={username} size={44} />
                                 <div className="min-w-0 flex-1">

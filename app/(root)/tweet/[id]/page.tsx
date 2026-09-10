@@ -1,27 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import axios from 'axios';
-import axiosInstance from '@/lib/axiosInstance';
-import { toast } from '@/lib/toast';
 import { ArrowLeft } from 'lucide-react';
-import useCommentStore from '@/store/commentStore';
+import { useTweet } from '@/lib/api';
 import FocusedTweet from '@/components/shared/FocusedTweet';
 import CommentCard from '@/components/ui/commentCard';
 import CreateCommentForm from '@/components/forms/createComment';
 import { Skeleton } from '@/components/ui/skeleton';
-
-function errMsg(error: unknown): string {
-    if (axios.isAxiosError(error)) {
-        return (
-            error.response?.data?.error ||
-            error.response?.data?.message ||
-            (error.response ? 'An error occurred. Please try again.' : 'Network error. Please try again.')
-        );
-    }
-    return 'An unexpected error occurred. Please try again later.';
-}
 
 function DetailSkeleton() {
     return (
@@ -43,43 +28,7 @@ export default function TweetDetailPage() {
     const params = useParams();
     const router = useRouter();
     const id = String(params.id ?? '');
-    const { tweet, setTweet } = useCommentStore();
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        let active = true;
-        setLoading(true);
-        axiosInstance
-            .get(`/tweets/${id}`)
-            .then((res) => active && setTweet(res.data.foundTweet))
-            .catch((error) => active && toast.error(errMsg(error)))
-            .finally(() => active && setLoading(false));
-        return () => {
-            active = false;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id]);
-
-    const handleLike = async () => {
-        const me = localStorage.getItem('username');
-        if (!me || !tweet || tweet._id !== id) return;
-
-        const liked = tweet.likes.some((l) => l.username === me);
-        const prev = tweet;
-        setTweet({
-            ...tweet,
-            likes: liked
-                ? tweet.likes.filter((l) => l.username !== me)
-                : [...tweet.likes, { username: me }],
-        });
-
-        try {
-            await axiosInstance.post(`/tweets/${id}/like`);
-        } catch (error) {
-            setTweet(prev);
-            toast.error(errMsg(error));
-        }
-    };
+    const { data: tweet, isLoading, isError } = useTweet(id);
 
     return (
         <div>
@@ -94,9 +43,9 @@ export default function TweetDetailPage() {
                 <h1 className="text-lg font-bold tracking-tight">Post</h1>
             </header>
 
-            {loading ? (
+            {isLoading ? (
                 <DetailSkeleton />
-            ) : !tweet ? (
+            ) : isError || !tweet ? (
                 <div className="px-8 py-16 text-center">
                     <p className="text-lg font-semibold">This post doesn&apos;t exist</p>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -105,7 +54,7 @@ export default function TweetDetailPage() {
                 </div>
             ) : (
                 <>
-                    <FocusedTweet tweet={tweet} onLike={handleLike} />
+                    <FocusedTweet tweet={tweet} />
                     <CreateCommentForm tweetId={id} action="Add" />
 
                     {tweet.comments && tweet.comments.length > 0 ? (

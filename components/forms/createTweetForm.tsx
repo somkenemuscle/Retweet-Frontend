@@ -11,19 +11,18 @@ import { isBase64Image } from "@/lib/utils";
 import { Form, FormField } from "@/components/ui/form";
 import { Input } from "../ui/input";
 import { useUploadThing } from "@/lib/uploadthing";
-import axiosInstance from "@/lib/axiosInstance";
 import { toast } from "@/lib/toast";
+import { useCreateTweet } from "@/lib/api";
 import { tweetFormSchema } from "@/lib/tweetSchema";
 import { ImageIcon, Smile, X } from "lucide-react";
 import Spinner from "../ui/Spinner";
 import Avatar from "../ui/Avatar";
-import useTweetStore from "@/store/tweetStore";
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import { useDialogStore } from '@/store/dialogStore';
 
 
 function CreateInteractionForm({ action }: { action: string }) {
-    const { setTweets } = useTweetStore();
+    const createTweet = useCreateTweet();
     const { startUpload } = useUploadThing("media");
     const [files, setFiles] = useState<File[]>([]);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -91,62 +90,34 @@ function CreateInteractionForm({ action }: { action: string }) {
         }
     }
 
-    async function getAllTweets() {
-        try {
-            const res = await axiosInstance.get('/tweets');
-            setTweets(res.data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
     async function onSubmit(values: z.infer<typeof tweetFormSchema>) {
-        setLoading(true);
+        if (action !== "Add") return;
 
         const username = localStorage.getItem("username");
-
-        if (values.image) {
-            const hasImageChanged = values.image && isBase64Image(values.image);
-            if (hasImageChanged && username) {
-                try {
-                    const imgRes = await startUpload(files);
-                    if (imgRes?.[0]?.url) {
-                        values.image = imgRes[0].url;
-                    }
-                } catch (error) {
-                    console.error("Error uploading image:", error);
-                }
-            }
+        if (!username) {
+            toast.error("You have to be logged in to make a post");
+            return;
         }
 
-        if (action === "Add") {
-            try {
-                form.reset();
-                setFiles([]);
-                setImagePreview(null);
-                const imageInput = document.getElementById("image-input") as HTMLInputElement;
-                if (imageInput) {
-                    imageInput.value = "";
-                }
-
-                if (username) {
-                    const res = await axiosInstance.post("/tweets", {
-                        text: values?.text,
-                        image: values?.image,
-                    });
-
-                    getAllTweets();
-                    const { message } = res.data;
-                    setIsDialogOpen(false);
-                    toast.success(message);
-                } else {
-                    toast.error("You have to be logged in to make a post");
-                }
-            } catch (error: any) {
-                console.error("Error occurred while making a tweet:", error);
-            } finally {
-                setLoading(false);
+        setLoading(true);
+        try {
+            if (values.image && isBase64Image(values.image)) {
+                const imgRes = await startUpload(files);
+                if (imgRes?.[0]?.url) values.image = imgRes[0].url;
             }
+
+            await createTweet.mutateAsync({ text: values.text, image: values.image });
+
+            form.reset();
+            setFiles([]);
+            setImagePreview(null);
+            const imageInput = document.getElementById("image-input") as HTMLInputElement;
+            if (imageInput) imageInput.value = "";
+            setIsDialogOpen(false);
+        } catch (error) {
+            console.error("Error occurred while making a tweet:", error);
+        } finally {
+            setLoading(false);
         }
     }
 

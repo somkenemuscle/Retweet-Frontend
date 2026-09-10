@@ -21,7 +21,6 @@ export function FeedSkeleton({ rows = 5 }: { rows?: number }) {
 type TweetFeedProps = {
   tweets: Tweet[];
   loading: boolean;
-  handleLikes: (id: string) => void;
   emptyTitle?: string;
   emptyHint?: string;
 };
@@ -29,7 +28,6 @@ type TweetFeedProps = {
 export default function TweetFeed({
   tweets,
   loading,
-  handleLikes,
   emptyTitle = "Nothing here yet",
   emptyHint,
 }: TweetFeedProps) {
@@ -57,7 +55,6 @@ export default function TweetFeed({
           verification={tweet.author.verification}
           likes={tweet.likes}
           commentCount={tweet.comments?.length ?? 0}
-          handleLikes={handleLikes}
         />
       ))}
     </ul>

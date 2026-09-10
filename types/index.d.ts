@@ -37,7 +37,6 @@ interface TweetCardProps {
    }[];
    commentCount?: number;
    verification: boolean;
-   handleLikes: (id: string) => void;
 }
 
 interface CommentCardProps {

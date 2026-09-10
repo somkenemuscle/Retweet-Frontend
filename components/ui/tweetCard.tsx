@@ -11,36 +11,22 @@ import {
     Trash2,
     BadgeCheck,
 } from "lucide-react"
-import axios from "axios"
-import axiosInstance from "@/lib/axiosInstance"
-import { toast } from "@/lib/toast";
-import useTweetStore from "@/store/tweetStore"
 import Avatar from "@/components/ui/Avatar"
+import { useLikeTweet, useSaveTweet, useDeleteTweet } from "@/lib/api"
 import { cn, formatRelativeTime } from "@/lib/utils"
 
-function extractErrorMessage(error: any): string {
-    if (axios.isAxiosError(error)) {
-        if (error.response) {
-            return (
-                error.response.data?.error ||
-                error.response.data?.message ||
-                'An error occurred. Please try again.'
-            )
-        }
-        return 'Network error. Please try again.'
-    }
-    return 'An unexpected error occurred. Please try again later.'
-}
-
-function TweetCard({ id, username, text, image, createdAt, likes, commentCount = 0, verification, handleLikes }: TweetCardProps) {
-    const { setTweets } = useTweetStore()
+function TweetCard({ id, username, text, image, createdAt, likes, commentCount = 0, verification }: TweetCardProps) {
     const router = useRouter()
+    const like = useLikeTweet()
+    const save = useSaveTweet()
+    const del = useDeleteTweet()
+
     const [menuOpen, setMenuOpen] = useState(false)
     const [justLiked, setJustLiked] = useState(false)
     const [saved, setSaved] = useState(false)
 
     const loggedInUsername = typeof window !== 'undefined' ? localStorage.getItem('username') : null
-    const userAlreadyLiked = likes.some((like) => like.username === loggedInUsername)
+    const userAlreadyLiked = likes.some((l) => l.username === loggedInUsername)
     const isOwner = loggedInUsername === username
 
     const fullDate = new Date(createdAt).toLocaleString(undefined, {
@@ -59,33 +45,22 @@ function TweetCard({ id, username, text, image, createdAt, likes, commentCount =
         router.push(`/tweet/${id}`)
     }
 
-    const handleSavedPost = async () => {
-        setSaved((s) => !s)
-        try {
-            const res = await axiosInstance.post(`/tweets/${id}/save`)
-            toast.success(res.data.message)
-        } catch (error: any) {
-            setSaved((s) => !s)
-            toast.error(extractErrorMessage(error))
-        }
-    }
-
     const onLike = (e: React.MouseEvent) => {
         e.stopPropagation()
         if (!userAlreadyLiked) setJustLiked(true)
-        handleLikes(id)
+        like.mutate(id)
     }
 
-    const handleDelete = async () => {
+    const onSave = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        setSaved((s) => !s)
+        save.mutate(id)
+    }
+
+    const onDelete = (e: React.MouseEvent) => {
+        e.stopPropagation()
         setMenuOpen(false)
-        try {
-            const res = await axiosInstance.delete(`/tweets/${id}`)
-            const refreshed = await axiosInstance.get(`/tweets`)
-            setTweets(refreshed.data)
-            toast.success(res.data.message)
-        } catch (error: any) {
-            toast.error(extractErrorMessage(error))
-        }
+        del.mutate(id)
     }
 
     return (
@@ -144,7 +119,7 @@ function TweetCard({ id, username, text, image, createdAt, likes, commentCount =
                                     />
                                     <div className="absolute right-0 z-20 mt-1 w-40 overflow-hidden rounded-xl border border-border bg-popover py-1 shadow-lg">
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleDelete() }}
+                                            onClick={onDelete}
                                             className="flex w-full items-center gap-2 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
                                         >
                                             <Trash2 className="h-4 w-4" /> Delete
@@ -209,7 +184,7 @@ function TweetCard({ id, username, text, image, createdAt, likes, commentCount =
                     </button>
 
                     <button
-                        onClick={(e) => { e.stopPropagation(); handleSavedPost() }}
+                        onClick={onSave}
                         aria-pressed={saved}
                         aria-label="Save"
                         className={cn(
